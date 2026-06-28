@@ -1847,3 +1847,21 @@ figcaption {
 .eit-track span:nth-child(4) { background: #8f1c22; }
 .eit-track span:nth-child(5) { background: #7a1620; }
 .eit-track span:nth-child(6) { background: #681318; }
+
+/* ---- Stats section: cinematic macro backdrop ---- */
+.stats {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.stats::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(15, 24, 56, .9), rgba(15, 24, 56, .8)),
+    linear-gradient(90deg, rgba(15, 24, 56, .95) 0%, rgba(15, 24, 56, .5) 60%, rgba(104, 19, 24, .35) 100%),
+    url("assets/img/macro-seal.jpg") center / cover no-repeat;
+}
