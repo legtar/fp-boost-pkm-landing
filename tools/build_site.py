@@ -680,6 +680,94 @@ def render_dl_page(slug, eyebrow, h1, title, description, pairs, intro):
     write(page, body)
 
 
+OBJECTS = [
+    ("object-1.jpg", "Бизнес-центр класса A", "Огнестойкие кабельные проходки в кабельных шахтах и щитовых бизнес-центра."),
+    ("object-2.jpg", "Телецентр", "Проходки кабелей и шинопроводов через противопожарные преграды телецентра."),
+    ("object-3.jpg", "Гостиничный комплекс", "Огнезащита инженерных проходок в гостиничном комплексе."),
+    ("object-4.jpg", "ЦОД и промышленные здания", "Проходки в центрах обработки данных и производственных комплексах."),
+]
+
+
+def render_obekty() -> None:
+    page = {"slug": "obekty", "prefix": "../", "trail": [("Главная", ""), ("Объекты", "obekty")],
+            "title": "Объекты и реализованные проекты ФП-БУСТ-ПКМ-01 — портфолио огнезащиты",
+            "description": "Реализованные объекты с огнестойкими проходками ФП-БУСТ-ПКМ-01: бизнес-центры, телецентр, гостиничные комплексы, ЦОД и промышленные здания 2023–2025 годов.",
+            "og_type": "website"}
+    page["schema"] = {"@context": "https://schema.org", "@graph": [
+        bc_schema(page["trail"]),
+        {"@type": "CollectionPage", "name": page["title"], "description": page["description"], "url": abs_url("obekty")}]}
+    figs = "".join(
+        f'<figure class="obekt"><img src="../assets/img/{img}" alt="{esc(title)} — монтаж проходок ФП-БУСТ-ПКМ-01" loading="lazy">'
+        f'<figcaption><strong>{esc(title)}</strong><span>{esc(desc)}</span></figcaption></figure>'
+        for img, title, desc in OBJECTS)
+    body = f"""
+      <section class="section section-light page-hero">
+        <div class="container">
+          <p class="eyebrow">Объекты</p>
+          <h1>Реализованные объекты ФП-БУСТ-ПКМ-01</h1>
+          <div class="page-lead"><p>Система огнестойких проходок смонтирована более чем на 120 объектах
+            в 2023–2025 годах: бизнес-центры, телецентр, гостиничные комплексы, центры обработки данных
+            и промышленные здания.</p></div>
+        </div>
+      </section>
+      <section class="section section-tinted">
+        <div class="container"><div class="obekty-grid">{figs}</div></div>
+      </section>
+      <section class="section section-light">
+        <div class="container">
+          <h2>Хотите такой же результат на вашем объекте?</h2>
+          <div class="hero-actions">
+            <a class="button button-primary" href="../#contacts">Получить расчёт КП</a>
+            <a class="button button-secondary" href="../kalkulyator/">Подобрать узел</a>
+          </div>
+        </div>
+      </section>
+"""
+    write(page, body)
+
+
+def render_dostavka() -> None:
+    faq = [("Доставляете ли вы в регионы России?", "Да, отгружаем материалы системы ФП-БУСТ-ПКМ-01 транспортными компаниями по всей России со склада в Москве."),
+           ("Можно ли заказать шеф-монтаж на объекте в регионе?", "Да, выезд специалиста для шеф-монтажа и авторского надзора согласуется индивидуально под объект."),
+           ("Как быстро отгружаются материалы?", "Материалы со склада отгружаются под график монтажных работ; сроки уточняются при подготовке КП.")]
+    page = {"slug": "dostavka", "prefix": "../", "trail": [("Главная", ""), ("Доставка по России", "dostavka")],
+            "title": "Доставка и поставка материалов ФП-БУСТ-ПКМ-01 по России",
+            "description": "Поставка материалов огнестойких проходок ФП-БУСТ-ПКМ-01 по всей России со склада в Москве: пена, герметик, минплита. Шеф-монтаж и сопровождение на объекте.",
+            "og_type": "website"}
+    page["schema"] = {"@context": "https://schema.org", "@graph": [
+        bc_schema(page["trail"]),
+        {"@type": "WebPage", "name": page["title"], "description": page["description"], "url": abs_url("dostavka")},
+        faq_schema(faq)]}
+    faq_html = "".join(f'\n          <details class="faq-item"><summary>{esc(q)}</summary><p>{esc(a)}</p></details>' for q, a in faq)
+    body = f"""
+      <section class="section section-light page-hero">
+        <div class="container narrow">
+          <p class="eyebrow">Доставка</p>
+          <h1>Поставка материалов по всей России</h1>
+          <div class="page-lead article-body">
+            <p>Материалы системы ФП-БУСТ-ПКМ-01 — противопожарная пена ФП-БУСТ-01, герметик ФП-БУСТ-05
+            и минераловатные плиты — отгружаются со склада в Москве транспортными компаниями по всей России.</p>
+            <h2>Как это работает</h2>
+            <ul class="ticks">
+              <li>Подбор узла и расчёт спецификации материалов под ваш объект</li>
+              <li>Отгрузка со склада под график монтажных работ</li>
+              <li>Доставка транспортной компанией в ваш город</li>
+              <li>Шеф-монтаж и авторский надзор на объекте — по согласованию</li>
+            </ul>
+            <div class="article-cta">
+              <a class="button button-primary" href="../#contacts">Запросить КП и сроки</a>
+              <a class="button button-secondary" href="../kalkulyator/">Подобрать узел</a>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="section section-tinted">
+        <div class="container narrow"><h2>Частые вопросы о доставке</h2><div class="faq-list">{faq_html}</div></div>
+      </section>
+"""
+    write(page, body)
+
+
 def write_sitemap(slugs) -> None:
     urls = [abs_url("")] + [abs_url(s) for s in slugs]
     items = "\n".join(
@@ -707,9 +795,11 @@ def main() -> None:
                    "Нормативная база огнестойких проходок — ФЗ-123, СП 6.13130, ГОСТ Р 53316, ТР ЕАЭС 043/2017",
                    "Нормативные документы по огнестойким кабельным и инженерным проходкам: ФЗ-123, СП 6.13130, ГОСТ Р 53316, ГОСТ 30247, ТР ЕАЭС 043/2017.",
                    NORMATIVES, "Ключевые документы, регулирующие требования к огнестойким проходкам в России.")
+    render_obekty()
+    render_dostavka()
 
     slugs = ([p["slug"] for p in PRODUCT_PAGES] + ["kalkulyator", "stati"]
-             + [f"stati/{a['slug']}" for a in ARTICLES] + ["glossariy", "normativy"])
+             + [f"stati/{a['slug']}" for a in ARTICLES] + ["glossariy", "normativy", "obekty", "dostavka"])
     write_sitemap(slugs)
 
 

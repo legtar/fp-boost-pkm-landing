@@ -2185,3 +2185,23 @@ figcaption {
 @media (max-width: 720px) {
   .article-grid { grid-template-columns: 1fr; }
 }
+
+/* ---- Objects (cases) grid ---- */
+.obekty-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.2rem;
+}
+.obekt {
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.obekt img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
+.obekt figcaption { display: grid; gap: .2rem; padding: 1rem 1.1rem; }
+.obekt figcaption strong { color: var(--navy); font-size: var(--text-lg); }
+.obekt figcaption span { color: var(--muted); font-size: var(--text-sm); }
+@media (max-width: 720px) { .obekty-grid { grid-template-columns: 1fr; } }
