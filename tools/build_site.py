@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
-"""Static site generator for the ФП-БУСТ-ПКМ-01 landing.
+"""Static site generator for the ФП-БУСТ-ПКМ-01 site.
 
-Generates SEO-optimized inner pages (product types + calculator) that share the
-homepage's header/footer/styles, each with breadcrumbs, Open Graph and JSON-LD
-(BreadcrumbList + Product/Service + FAQPage). Also regenerates sitemap.xml.
+Generates SEO-optimized inner pages that share the homepage header/footer/styles,
+each with breadcrumbs, Open Graph and JSON-LD (BreadcrumbList + Product/Article/
+FAQPage). Supports nested URLs (e.g. /stati/<slug>/) and regenerates sitemap.xml.
+
+Pages produced:
+  * 4 product-type pages          (/kabelnye-prohodki/ …)
+  * calculator                    (/kalkulyator/)
+  * knowledge hub + articles      (/stati/ , /stati/<slug>/)
+  * glossary, normative base      (/glossariy/ , /normativy/)
 
 Run:  python tools/build_site.py
 """
@@ -16,6 +22,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BASE = "https://legtar.github.io/fp-boost-pkm-landing"
 ORG_ID = f"{BASE}/#org"
+TODAY = "2026-06-29"
 
 FAVICON = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E"
            "%3Crect width='32' height='32' rx='7' fill='%230f1838'/%3E%3Cg fill='%23f0b36f'%3E"
@@ -28,11 +35,19 @@ def esc(s: str) -> str:
     return html.escape(s, quote=True)
 
 
+def prefix_for(slug: str) -> str:
+    return "../" * (slug.count("/") + 1)
+
+
+def abs_url(path: str) -> str:
+    return f"{BASE}/" + (path + "/" if path else "")
+
+
 def head(page) -> str:
-    p = "../"  # all generated pages live one level deep
-    url = f"{BASE}/{page['slug']}/"
+    p = page["prefix"]
+    url = abs_url(page["slug"])
     schema = json.dumps(page["schema"], ensure_ascii=False, indent=2)
-    extra_css = page.get("extra_head", "")
+    extra = page.get("extra_head", "")
     return f"""<!doctype html>
 <html lang="ru">
   <head>
@@ -43,7 +58,7 @@ def head(page) -> str:
     <meta name="theme-color" content="#0f1838">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="{url}">
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="{page.get('og_type', 'website')}">
     <meta property="og:locale" content="ru_RU">
     <meta property="og:site_name" content="Техносерт Груп — Fire Protection Boost">
     <meta property="og:url" content="{url}">
@@ -55,7 +70,7 @@ def head(page) -> str:
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
     <link rel="stylesheet" href="{p}styles.css">
-    {extra_css}
+    {extra}
     <script src="{p}script.js" defer></script>
     <script type="application/ld+json">
 {schema}
@@ -71,9 +86,9 @@ def head(page) -> str:
       <nav class="site-nav" aria-label="Основная навигация">
         <a href="{p}kabelnye-prohodki/">Кабельные</a>
         <a href="{p}shinoprovody/">Шинопроводы</a>
-        <a href="{p}truby-vozduhovody/">Трубы и воздуховоды</a>
+        <a href="{p}truby-vozduhovody/">Трубы</a>
         <a href="{p}kalkulyator/">Калькулятор</a>
-        <a href="{p}#certificates">Сертификаты</a>
+        <a href="{p}stati/">Статьи</a>
       </nav>
       <div class="header-actions">
         <a class="header-phone" href="tel:+74950000000">
@@ -87,19 +102,23 @@ def head(page) -> str:
 
 
 def breadcrumbs(page) -> str:
-    p = "../"
+    p = page["prefix"]
+    out = []
+    trail = page["trail"]
+    for i, (name, path) in enumerate(trail):
+        if i < len(trail) - 1:
+            rel = p + (path + "/" if path else "")
+            out.append(f'<a href="{rel}">{esc(name)}</a><span aria-hidden="true">/</span>')
+        else:
+            out.append(f"<span>{esc(name)}</span>")
     return f"""
       <nav class="breadcrumbs" aria-label="Хлебные крошки">
-        <div class="container">
-          <a href="{p}">Главная</a>
-          <span aria-hidden="true">/</span>
-          <span>{esc(page['crumb'])}</span>
-        </div>
+        <div class="container">{''.join(out)}</div>
       </nav>"""
 
 
-def footer() -> str:
-    p = "../"
+def footer(page) -> str:
+    p = page["prefix"]
     return f"""
     </main>
     <footer class="site-footer">
@@ -112,7 +131,10 @@ def footer() -> str:
             <a href="{p}shinoprovody/">Проходы шинопроводов</a>
             <a href="{p}truby-vozduhovody/">Трубы и воздуховоды</a>
             <a href="{p}kombinirovannye-prohodki/">Комбинированные проходки</a>
-            <a href="{p}kalkulyator/">Калькулятор подбора узла</a>
+            <a href="{p}kalkulyator/">Калькулятор</a>
+            <a href="{p}stati/">Статьи</a>
+            <a href="{p}glossariy/">Глоссарий</a>
+            <a href="{p}normativy/">Нормативная база</a>
           </nav>
         </div>
         <div class="footer-links">
@@ -122,152 +144,67 @@ def footer() -> str:
         </div>
       </div>
     </footer>
-    <a class="mobile-cta" href="../#contacts">Получить расчёт КП</a>
+    <a class="mobile-cta" href="{p}#contacts">Получить расчёт КП</a>
   </body>
 </html>
 """
 
 
-def breadcrumb_schema(page):
+def bc_schema(trail):
     return {
         "@type": "BreadcrumbList",
         "itemListElement": [
-            {"@type": "ListItem", "position": 1, "name": "Главная", "item": f"{BASE}/"},
-            {"@type": "ListItem", "position": 2, "name": page["crumb"], "item": f"{BASE}/{page['slug']}/"},
+            {"@type": "ListItem", "position": i + 1, "name": name, "item": abs_url(path)}
+            for i, (name, path) in enumerate(trail)
         ],
     }
 
 
 def faq_schema(faq):
-    return {
-        "@type": "FAQPage",
-        "mainEntity": [
-            {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}
-            for q, a in faq
-        ],
-    }
+    return {"@type": "FAQPage", "mainEntity": [
+        {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in faq]}
 
 
-def product_schema(page):
-    return {
-        "@type": "Product",
-        "name": page["product_name"],
-        "category": "Огнезащита / огнестойкие проходки",
-        "brand": {"@type": "Brand", "name": "ФП-БУСТ"},
-        "manufacturer": {"@id": ORG_ID},
-        "description": page["description"],
-        "image": f"{BASE}/assets/img/og-cover.jpg",
-    }
-
-
-def render_product(page) -> None:
-    faq_html = "".join(
-        f"""
-          <details class="faq-item">
-            <summary>{esc(q)}</summary>
-            <p>{esc(a)}</p>
-          </details>"""
-        for q, a in page["faq"]
-    )
-    feature_html = "".join(f"<li>{esc(x)}</li>" for x in page["features"])
-    app_html = "".join(f"<li>{esc(x)}</li>" for x in page["applications"])
-    eit_html = "".join(f"<span>{v}</span>" for v in ["45", "60", "90", "120", "150", "180"])
-    intro_html = "".join(f"<p>{esc(par)}</p>" for par in page["intro"])
-    related = [r for r in PRODUCT_PAGES if r["slug"] != page["slug"]]
-    related_html = "".join(
-        f'<a class="related-card" href="../{r["slug"]}/"><strong>{esc(r["crumb"])}</strong><span>{esc(r["short"])}</span></a>'
-        for r in related
-    )
-
-    page["schema"] = {"@context": "https://schema.org", "@graph": [
-        breadcrumb_schema(page), product_schema(page), faq_schema(page["faq"]),
-    ]}
-
-    body = f"""
-      <section class="section section-light page-hero">
-        <div class="container">
-          <p class="eyebrow">{esc(page['eyebrow'])}</p>
-          <h1>{esc(page['h1'])}</h1>
-          <div class="page-lead">{intro_html}</div>
-          <div class="hero-actions">
-            <a class="button button-primary" href="../kalkulyator/">Подобрать узел в калькуляторе</a>
-            <a class="button button-secondary" href="../#contacts">Получить расчёт КП</a>
-          </div>
-        </div>
-      </section>
-
-      <section class="section section-tinted">
-        <div class="container split-cols">
-          <div class="prose">
-            <h2>Применение</h2>
-            <ul class="ticks">{app_html}</ul>
-            <h2>Характеристики и преимущества</h2>
-            <ul class="ticks">{feature_html}</ul>
-          </div>
-          <aside class="spec-aside">
-            <h3>Пределы огнестойкости {esc(page['eit_letter'])}, минут</h3>
-            <div class="eit-track">{eit_html}</div>
-            <dl class="spec-list">
-              <div><dt>Сертификация</dt><dd>{esc(page['cert'])}</dd></div>
-              <div><dt>Маркировка</dt><dd>{esc(page['marking'])}</dd></div>
-              <div><dt>Материалы заделки</dt><dd>пена ФП-БУСТ-01, герметик ФП-БУСТ-05, минплита ≥150 кг/м³</dd></div>
-            </dl>
-            <a class="button button-primary full" href="../#contacts">Запросить КП и спецификацию</a>
-          </aside>
-        </div>
-      </section>
-
-      <section class="section section-light">
-        <div class="container">
-          <h2>Частые вопросы</h2>
-          <div class="faq-list">{faq_html}</div>
-        </div>
-      </section>
-
-      <section class="section section-tinted">
-        <div class="container">
-          <h2>Другие типы проходок ФП-БУСТ-ПКМ-01</h2>
-          <div class="related-grid">{related_html}</div>
-        </div>
-      </section>
-"""
+def write(page, body):
     out = ROOT / page["slug"] / "index.html"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(head(page) + breadcrumbs(page) + body + footer(), encoding="utf-8")
+    out.write_text(head(page) + breadcrumbs(page) + body + footer(page), encoding="utf-8")
     print("wrote", out.relative_to(ROOT))
 
 
-# --------------------------- Product page content ---------------------------
+def render_blocks(blocks) -> str:
+    parts = []
+    for kind, val in blocks:
+        if kind == "h2":
+            parts.append(f"<h2>{esc(val)}</h2>")
+        elif kind == "p":
+            parts.append(f"<p>{esc(val)}</p>")
+        elif kind == "ul":
+            lis = "".join(f"<li>{esc(x)}</li>" for x in val)
+            parts.append(f'<ul class="ticks">{lis}</ul>')
+    return "\n".join(parts)
+
+
+# =========================== PRODUCT PAGES ===========================
 
 PRODUCT_PAGES = [
     {
-        "slug": "kabelnye-prohodki",
-        "crumb": "Кабельные проходки",
-        "short": "Кабели, лотки, гильзы, модульные проходки",
-        "eyebrow": "Кабельные проходки",
+        "slug": "kabelnye-prohodki", "crumb": "Кабельные проходки",
+        "short": "Кабели, лотки, гильзы, модульные проходки", "eyebrow": "Кабельные проходки",
         "h1": "Огнестойкие кабельные проходки ФП-БУСТ-ПКМ-01",
         "title": "Огнестойкие кабельные проходки ФП-БУСТ-ПКМ-01 — EIT до 180, сертификат ЕАЭС",
         "description": "Универсальные огнестойкие кабельные проходки ФП-БУСТ-ПКМ-01: гильзы, лотки, модульные проходки. Огнестойкость EIT 45–180 минут, сертификат ТР ЕАЭС 043/2017, шеф-монтаж.",
         "product_name": "Огнестойкая кабельная проходка ФП-БУСТ-ПКМ-01",
-        "eit_letter": "EIT",
-        "cert": "Сертификат ТР ЕАЭС 043/2017",
-        "marking": "ФП-БУСТ-ПКМ-01-АхВ-4/ПМ(1)-150",
+        "eit_letter": "EIT", "cert": "Сертификат ТР ЕАЭС 043/2017", "marking": "ФП-БУСТ-ПКМ-01-АхВ-4/ПМ(1)-150",
         "intro": [
             "Огнестойкие кабельные проходки ФП-БУСТ-ПКМ-01 восстанавливают предел огнестойкости стен и перекрытий в местах прохода силовых и слаботочных кабелей. Узел заделки не даёт огню и дыму распространяться между помещениями и этажами через кабельные проёмы.",
             "Система рассчитана на групповую прокладку кабелей и работает с закладными гильзами, гильзопакетами, модульными проходками, кабельными лотками и электротехническими коробами.",
         ],
-        "applications": [
-            "Кабель внутри закладных гильз и гильзопакетов",
-            "Модульные кабельные проходки",
-            "Кабельные лотки и электротехнические короба",
-            "Групповая прокладка силовых и слаботочных кабелей",
-        ],
-        "features": [
-            "Огнестойкость EIT 45, 60, 90, 120, 150 и 180 минут",
-            "Сертификат соответствия ТР ЕАЭС 043/2017",
-            "Надёжная работа при плотной групповой прокладке кабелей",
-            "Ремонтопригодность: возможна доустановка кабелей в эксплуатируемую проходку",
-        ],
+        "applications": ["Кабель внутри закладных гильз и гильзопакетов", "Модульные кабельные проходки",
+                         "Кабельные лотки и электротехнические короба", "Групповая прокладка силовых и слаботочных кабелей"],
+        "features": ["Огнестойкость EIT 45, 60, 90, 120, 150 и 180 минут", "Сертификат соответствия ТР ЕАЭС 043/2017",
+                     "Надёжная работа при плотной групповой прокладке кабелей",
+                     "Ремонтопригодность: возможна доустановка кабелей в эксплуатируемую проходку"],
         "faq": [
             ("Какой предел огнестойкости даёт кабельная проходка ФП-БУСТ-ПКМ-01?", "EIT 45, 60, 90, 120, 150 или 180 минут — в зависимости от конструкции узла, типа стены/перекрытия и заполнения проёма."),
             ("Можно ли доукладывать кабели после монтажа проходки?", "Да. Для эксплуатируемых проходок применяются разборные решения на пеноблоках ФП-БУСТ-01, позволяющие добавлять кабели без полной переделки узла."),
@@ -275,33 +212,22 @@ PRODUCT_PAGES = [
         ],
     },
     {
-        "slug": "shinoprovody",
-        "crumb": "Проходы шинопроводов",
-        "short": "Магистральные и распределительные шинопроводы до 6300 А",
-        "eyebrow": "Проходы шинопроводов",
+        "slug": "shinoprovody", "crumb": "Проходы шинопроводов",
+        "short": "Магистральные и распределительные шинопроводы до 6300 А", "eyebrow": "Проходы шинопроводов",
         "h1": "Огнестойкие проходы шинопроводов ФП-БУСТ-ПКМ-01",
         "title": "Огнестойкие проходы шинопроводов ФП-БУСТ-ПКМ-01 — до 6300 А, EIT до 180",
         "description": "Огнестойкие проходы шинопроводов ФП-БУСТ-ПКМ-01 для магистральных и распределительных шинопроводов до 1000 В и 6300 А. Огнестойкость EIT 45–180, сертификат ТР ЕАЭС 043/2017.",
         "product_name": "Огнестойкий проход шинопровода ФП-БУСТ-ПКМ-01",
-        "eit_letter": "EIT",
-        "cert": "Сертификат ТР ЕАЭС 043/2017",
-        "marking": "ФП-БУСТ-ПКМ-01-АхВ-Ш/ПМ(1)-150",
+        "eit_letter": "EIT", "cert": "Сертификат ТР ЕАЭС 043/2017", "marking": "ФП-БУСТ-ПКМ-01-АхВ-Ш/ПМ(1)-150",
         "intro": [
             "Огнестойкие проходы шинопроводов ФП-БУСТ-ПКМ-01 герметизируют проёмы в местах прохода магистральных и распределительных шинопроводов через противопожарные преграды.",
             "Решение рассчитано на шинопроводы напряжением до 1000 В с номинальным током от 100 до 6300 А и совместимо со всеми распространёнными марками шинопроводов.",
         ],
-        "applications": [
-            "Магистральные шинопроводы",
-            "Распределительные шинопроводы",
-            "Шинопроводы напряжением до 1000 В",
-            "Номинальный ток от 100 до 6300 А",
-        ],
-        "features": [
-            "Огнестойкость EIT 45, 60, 90, 120, 150 и 180 минут",
-            "Сертификат соответствия ТР ЕАЭС 043/2017",
-            "Совместимость со всеми распространёнными марками шинопроводов",
-            "Учитывает тепловое расширение шинопровода в узле заделки",
-        ],
+        "applications": ["Магистральные шинопроводы", "Распределительные шинопроводы",
+                         "Шинопроводы напряжением до 1000 В", "Номинальный ток от 100 до 6300 А"],
+        "features": ["Огнестойкость EIT 45, 60, 90, 120, 150 и 180 минут", "Сертификат соответствия ТР ЕАЭС 043/2017",
+                     "Совместимость со всеми распространёнными марками шинопроводов",
+                     "Учитывает тепловое расширение шинопровода в узле заделки"],
         "faq": [
             ("На какой ток рассчитаны проходы шинопроводов?", "На шинопроводы напряжением до 1000 В с номинальным током от 100 до 6300 А."),
             ("Подходит ли система к шинопроводам разных производителей?", "Да, узел совместим со всеми распространёнными марками магистральных и распределительных шинопроводов."),
@@ -309,33 +235,21 @@ PRODUCT_PAGES = [
         ],
     },
     {
-        "slug": "truby-vozduhovody",
-        "crumb": "Трубы и воздуховоды",
-        "short": "Металлические трубопроводы, воздуховоды, газоходы",
-        "eyebrow": "Трубопроводы и воздуховоды",
+        "slug": "truby-vozduhovody", "crumb": "Трубы и воздуховоды",
+        "short": "Металлические трубопроводы, воздуховоды, газоходы", "eyebrow": "Трубопроводы и воздуховоды",
         "h1": "Огнестойкие проходы трубопроводов и воздуховодов ФП-БУСТ-ПКМ-01",
         "title": "Огнестойкие проходы труб и воздуховодов ФП-БУСТ-ПКМ-01 — EI до 180",
         "description": "Огнестойкие проходы трубопроводов, воздуховодов и газоходов ФП-БУСТ-ПКМ-01. Огнестойкость EI 45–180, добровольная сертификация ГОСТ 30247.0-94, 30247.1-94.",
         "product_name": "Огнестойкий проход трубопровода/воздуховода ФП-БУСТ-ПКМ-01",
-        "eit_letter": "EI",
-        "cert": "Добровольная сертификация ГОСТ 30247.0-94, 30247.1-94",
-        "marking": "ФП-БУСТ-ПКМ-01-АхВ-Т/ПМ(1)-150",
+        "eit_letter": "EI", "cert": "Добровольная сертификация ГОСТ 30247.0-94, 30247.1-94", "marking": "ФП-БУСТ-ПКМ-01-АхВ-Т/ПМ(1)-150",
         "intro": [
             "Огнестойкие проходы ФП-БУСТ-ПКМ-01 для трубопроводов и воздуховодов восстанавливают огнестойкость преграды в местах прохода инженерных сетей через стены и перекрытия.",
             "Решение применяется для металлических трубопроводов, закладных гильз, воздуховодов, газоходов и тепловой изоляции.",
         ],
-        "applications": [
-            "Металлические трубопроводы и закладные гильзы",
-            "Воздуховоды и газоходы",
-            "Тепловая изоляция трубопроводов",
-            "Инженерные сети зданий и сооружений",
-        ],
-        "features": [
-            "Огнестойкость EI 45, 60, 90, 120, 150 и 180 минут",
-            "Добровольная сертификация ГОСТ 30247.0-94, 30247.1-94",
-            "Совместимость с инженерными сетями и тепловой изоляцией",
-            "Подходит для разных материалов стен и перекрытий",
-        ],
+        "applications": ["Металлические трубопроводы и закладные гильзы", "Воздуховоды и газоходы",
+                         "Тепловая изоляция трубопроводов", "Инженерные сети зданий и сооружений"],
+        "features": ["Огнестойкость EI 45, 60, 90, 120, 150 и 180 минут", "Добровольная сертификация ГОСТ 30247.0-94, 30247.1-94",
+                     "Совместимость с инженерными сетями и тепловой изоляцией", "Подходит для разных материалов стен и перекрытий"],
         "faq": [
             ("Чем отличается обозначение EI от EIT?", "EI — потеря целостности (E) и теплоизолирующей способности (I); индекс T дополнительно нормирует температуру. Для труб и воздуховодов применяется предел EI 45–180 минут."),
             ("Подходит ли решение для воздуховодов с изоляцией?", "Да, узел рассчитан на воздуховоды, газоходы и трубопроводы с тепловой изоляцией."),
@@ -343,33 +257,21 @@ PRODUCT_PAGES = [
         ],
     },
     {
-        "slug": "kombinirovannye-prohodki",
-        "crumb": "Комбинированные проходки",
-        "short": "Разнотипные коммуникации через один проём",
-        "eyebrow": "Комбинированные проходки",
+        "slug": "kombinirovannye-prohodki", "crumb": "Комбинированные проходки",
+        "short": "Разнотипные коммуникации через один проём", "eyebrow": "Комбинированные проходки",
         "h1": "Комбинированные огнестойкие проходки ФП-БУСТ-ПКМ-01",
         "title": "Комбинированные огнестойкие проходки ФП-БУСТ-ПКМ-01 — EI до 180",
         "description": "Комбинированные огнестойкие проходки ФП-БУСТ-ПКМ-01 для разнотипных коммуникаций через один проём: кабели, шинопроводы, трубы и воздуховоды. Огнестойкость EI 45–180.",
         "product_name": "Комбинированная огнестойкая проходка ФП-БУСТ-ПКМ-01",
-        "eit_letter": "EI",
-        "cert": "Добровольная сертификация ГОСТ 30247.0-94, 30247.1-94",
-        "marking": "ФП-БУСТ-ПКМ-01-АхВ-К/ПМ(1)-150",
+        "eit_letter": "EI", "cert": "Добровольная сертификация ГОСТ 30247.0-94, 30247.1-94", "marking": "ФП-БУСТ-ПКМ-01-АхВ-К/ПМ(1)-150",
         "intro": [
             "Комбинированные огнестойкие проходки ФП-БУСТ-ПКМ-01 позволяют провести через один проём разнотипные коммуникации в любой комбинации: кабели, шинопроводы, трубопроводы и воздуховоды.",
             "Это упрощает проектирование и монтаж на объектах с плотными инженерными узлами и снижает число отдельных проёмов в противопожарных преградах.",
         ],
-        "applications": [
-            "Смешанные проёмы с кабелями и шинопроводами",
-            "Совмещённые проходы труб и воздуховодов",
-            "Плотные инженерные узлы и шахты",
-            "Объекты с дефицитом места в противопожарных преградах",
-        ],
-        "features": [
-            "Огнестойкость EI 45, 60, 90, 120, 150 и 180 минут",
-            "Добровольная сертификация ГОСТ 30247.0-94, 30247.1-94",
-            "Любая комбинация коммуникаций в одном проёме",
-            "Совместимость с материалами стен и перекрытий",
-        ],
+        "applications": ["Смешанные проёмы с кабелями и шинопроводами", "Совмещённые проходы труб и воздуховодов",
+                         "Плотные инженерные узлы и шахты", "Объекты с дефицитом места в противопожарных преградах"],
+        "features": ["Огнестойкость EI 45, 60, 90, 120, 150 и 180 минут", "Добровольная сертификация ГОСТ 30247.0-94, 30247.1-94",
+                     "Любая комбинация коммуникаций в одном проёме", "Совместимость с материалами стен и перекрытий"],
         "faq": [
             ("Можно ли провести кабели и трубы через один проём?", "Да, комбинированный узел рассчитан на любую комбинацию кабелей, шинопроводов, трубопроводов и воздуховодов в одном проёме."),
             ("Снижается ли огнестойкость при смешанном проёме?", "Нет, при правильном подборе узла сохраняется требуемый предел EI 45–180 минут для всей комбинации коммуникаций."),
@@ -379,73 +281,120 @@ PRODUCT_PAGES = [
 ]
 
 
-def render_calculator() -> None:
-    page = {
-        "slug": "kalkulyator",
-        "crumb": "Калькулятор подбора узла",
-        "title": "Калькулятор подбора узла огнестойкой проходки ФП-БУСТ-ПКМ-01",
-        "description": "Онлайн-калькулятор подбора узла огнестойкой проходки ФП-БУСТ-ПКМ-01: по типу коммуникации, размеру проёма и требуемой огнестойкости EIT/EI — маркировка узла и спецификация материалов.",
-        "extra_head": '<script src="../calc.js" defer></script>',
-    }
+def render_product(page) -> None:
+    page["prefix"] = prefix_for(page["slug"])
+    page["trail"] = [("Главная", ""), (page["crumb"], page["slug"])]
+    page["og_type"] = "website"
     page["schema"] = {"@context": "https://schema.org", "@graph": [
-        breadcrumb_schema(page),
+        bc_schema(page["trail"]),
+        {"@type": "Product", "name": page["product_name"], "category": "Огнезащита / огнестойкие проходки",
+         "brand": {"@type": "Brand", "name": "ФП-БУСТ"}, "manufacturer": {"@id": ORG_ID},
+         "description": page["description"], "image": f"{BASE}/assets/img/og-cover.jpg"},
+        faq_schema(page["faq"]),
+    ]}
+    faq_html = "".join(f'\n          <details class="faq-item"><summary>{esc(q)}</summary><p>{esc(a)}</p></details>'
+                       for q, a in page["faq"])
+    feat = "".join(f"<li>{esc(x)}</li>" for x in page["features"])
+    apps = "".join(f"<li>{esc(x)}</li>" for x in page["applications"])
+    eit = "".join(f"<span>{v}</span>" for v in ["45", "60", "90", "120", "150", "180"])
+    intro = "".join(f"<p>{esc(x)}</p>" for x in page["intro"])
+    related = "".join(
+        f'<a class="related-card" href="../{r["slug"]}/"><strong>{esc(r["crumb"])}</strong><span>{esc(r["short"])}</span></a>'
+        for r in PRODUCT_PAGES if r["slug"] != page["slug"])
+    body = f"""
+      <section class="section section-light page-hero">
+        <div class="container">
+          <p class="eyebrow">{esc(page['eyebrow'])}</p>
+          <h1>{esc(page['h1'])}</h1>
+          <div class="page-lead">{intro}</div>
+          <div class="hero-actions">
+            <a class="button button-primary" href="../kalkulyator/">Подобрать узел в калькуляторе</a>
+            <a class="button button-secondary" href="../#contacts">Получить расчёт КП</a>
+          </div>
+        </div>
+      </section>
+      <section class="section section-tinted">
+        <div class="container split-cols">
+          <div class="prose">
+            <h2>Применение</h2>
+            <ul class="ticks">{apps}</ul>
+            <h2>Характеристики и преимущества</h2>
+            <ul class="ticks">{feat}</ul>
+          </div>
+          <aside class="spec-aside">
+            <h3>Пределы огнестойкости {esc(page['eit_letter'])}, минут</h3>
+            <div class="eit-track">{eit}</div>
+            <dl class="spec-list">
+              <div><dt>Сертификация</dt><dd>{esc(page['cert'])}</dd></div>
+              <div><dt>Маркировка</dt><dd>{esc(page['marking'])}</dd></div>
+              <div><dt>Материалы заделки</dt><dd>пена ФП-БУСТ-01, герметик ФП-БУСТ-05, минплита ≥150 кг/м³</dd></div>
+            </dl>
+            <a class="button button-primary full" href="../#contacts">Запросить КП и спецификацию</a>
+          </aside>
+        </div>
+      </section>
+      <section class="section section-light">
+        <div class="container"><h2>Частые вопросы</h2><div class="faq-list">{faq_html}</div></div>
+      </section>
+      <section class="section section-tinted">
+        <div class="container"><h2>Другие типы проходок ФП-БУСТ-ПКМ-01</h2><div class="related-grid">{related}</div></div>
+      </section>
+"""
+    write(page, body)
+
+
+# =========================== CALCULATOR ===========================
+
+def render_calculator() -> None:
+    page = {"slug": "kalkulyator", "prefix": "../",
+            "trail": [("Главная", ""), ("Калькулятор подбора узла", "kalkulyator")],
+            "title": "Калькулятор подбора узла огнестойкой проходки ФП-БУСТ-ПКМ-01",
+            "description": "Онлайн-калькулятор подбора узла огнестойкой проходки ФП-БУСТ-ПКМ-01: по типу коммуникации, размеру проёма и требуемой огнестойкости EIT/EI — маркировка узла и спецификация материалов.",
+            "extra_head": '<script src="../calc.js" defer></script>', "og_type": "website"}
+    page["schema"] = {"@context": "https://schema.org", "@graph": [
+        bc_schema(page["trail"]),
         {"@type": "WebApplication", "name": "Калькулятор подбора узла ФП-БУСТ-ПКМ-01",
          "applicationCategory": "BusinessApplication", "operatingSystem": "Web",
          "offers": {"@type": "Offer", "price": "0", "priceCurrency": "RUB"},
-         "description": page["description"], "url": f"{BASE}/{page['slug']}/"},
+         "description": page["description"], "url": abs_url("kalkulyator")},
     ]}
     body = """
       <section class="section section-light page-hero">
         <div class="container">
           <p class="eyebrow">Калькулятор</p>
           <h1>Калькулятор подбора узла ФП-БУСТ-ПКМ-01</h1>
-          <div class="page-lead">
-            <p>Укажите тип коммуникации, размеры проёма и требуемый предел огнестойкости —
+          <div class="page-lead"><p>Укажите тип коммуникации, размеры проёма и требуемый предел огнестойкости —
             калькулятор предложит предварительную маркировку узла и состав материалов заделки.
-            Точный узел и спецификацию подтверждает инженер при подготовке КП.</p>
-          </div>
+            Точный узел и спецификацию подтверждает инженер при подготовке КП.</p></div>
         </div>
       </section>
-
       <section class="section section-tinted">
         <div class="container calc-wrap">
           <form class="calc-form" id="calcForm" novalidate>
-            <div class="field">
-              <label for="calcType">Тип коммуникации</label>
+            <div class="field"><label for="calcType">Тип коммуникации</label>
               <select id="calcType" name="type">
                 <option value="kabel">Кабели / кабельные лотки</option>
                 <option value="shina">Шинопровод</option>
                 <option value="truba">Трубопровод / воздуховод</option>
                 <option value="kombi">Комбинированный проём</option>
-              </select>
-            </div>
+              </select></div>
             <div class="field-row">
-              <div class="field">
-                <label for="calcW">Ширина проёма A, мм</label>
-                <input type="number" id="calcW" name="w" min="50" max="3000" step="10" placeholder="например, 400">
-              </div>
-              <div class="field">
-                <label for="calcH">Высота проёма B, мм</label>
-                <input type="number" id="calcH" name="h" min="50" max="3000" step="10" placeholder="например, 200">
-              </div>
+              <div class="field"><label for="calcW">Ширина проёма A, мм</label>
+                <input type="number" id="calcW" name="w" min="50" max="3000" step="10" placeholder="например, 400"></div>
+              <div class="field"><label for="calcH">Высота проёма B, мм</label>
+                <input type="number" id="calcH" name="h" min="50" max="3000" step="10" placeholder="например, 200"></div>
             </div>
-            <div class="field">
-              <label for="calcEit">Требуемая огнестойкость, минут</label>
-              <select id="calcEit" name="eit">
-                <option>45</option><option>60</option><option>90</option>
-                <option selected>120</option><option>150</option><option>180</option>
-              </select>
-            </div>
+            <div class="field"><label for="calcEit">Требуемая огнестойкость, минут</label>
+              <select id="calcEit" name="eit"><option>45</option><option>60</option><option>90</option>
+                <option selected>120</option><option>150</option><option>180</option></select></div>
             <button class="button button-primary full" type="submit">Подобрать узел</button>
           </form>
-
           <aside class="calc-result" id="calcResult" aria-live="polite">
             <h3>Результат подбора</h3>
             <p class="calc-empty">Заполните параметры проёма и нажмите «Подобрать узел».</p>
           </aside>
         </div>
       </section>
-
       <section class="section section-light">
         <div class="container">
           <h2>Как монтируется узел ФП-БУСТ-ПКМ-01</h2>
@@ -459,23 +408,287 @@ def render_calculator() -> None:
         </div>
       </section>
 """
-    out = ROOT / page["slug"] / "index.html"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(head(page) + breadcrumbs(page) + body + footer(), encoding="utf-8")
-    print("wrote", out.relative_to(ROOT))
+    write(page, body)
+
+
+# =========================== ARTICLES (knowledge hub) ===========================
+
+ARTICLES = [
+    {
+        "slug": "rasshifrovka-markirovki", "title": "Расшифровка маркировки узла ФП-БУСТ-ПКМ-01",
+        "seo_title": "Расшифровка маркировки ФП-БУСТ-ПКМ-01 — как читать обозначение узла",
+        "description": "Как читать маркировку огнестойкой проходки ФП-БУСТ-ПКМ-01: габариты А×В, тип коммуникаций, материал заделки /ПМ, конструктивное исполнение и предел огнестойкости EIT.",
+        "blocks": [
+            ("p", "Обозначение узла огнестойкой проходки кодирует всю ключевую информацию: габариты проёма, тип коммуникаций, материал заделки, конструктивное исполнение и предел огнестойкости. Разберём на примере ФП-БУСТ-ПКМ-01-АхВ-4/ПМ(1)-150."),
+            ("h2", "Из чего состоит маркировка"),
+            ("ul", ["ФП-БУСТ-ПКМ-01 — наименование системы проходки",
+                    "А х В — ширина и высота проёма в миллиметрах",
+                    "цифра/буква — тип коммуникаций и конструктивное исполнение узла",
+                    "/ПМ — состав заделки: пена, минплита и герметик",
+                    "(1) — конструктивное исполнение",
+                    "150 — предел огнестойкости EIT в минутах"]),
+            ("h2", "Зачем это нужно проектировщику"),
+            ("p", "Маркировка позволяет однозначно заложить в проект конкретный типовой узел с подтверждённым пределом огнестойкости и проверить соответствие требованиям пожарной экспертизы без дополнительных согласований."),
+            ("p", "Подобрать маркировку под ваш проём можно в калькуляторе подбора узла, а точную спецификацию подтвердит инженер при подготовке КП."),
+        ],
+        "faq": [("Что означает /ПМ в маркировке?", "Это состав заделки: противопожарная пена ФП-БУСТ-01, минераловатная плита и герметик ФП-БУСТ-05."),
+                ("Что означает число в конце маркировки?", "Предел огнестойкости узла EIT (или EI) в минутах — например, 150 означает 150 минут.")],
+    },
+    {
+        "slug": "predely-ognestoykosti-eit-ei", "title": "Пределы огнестойкости EIT и EI: что означают",
+        "seo_title": "Пределы огнестойкости EIT и EI — что означают буквы и минуты",
+        "description": "Что означают пределы огнестойкости EI и EIT, чем отличаются буквы E, I, T и числа 45–180 минут, и какой предел нужен для кабельных и инженерных проходок.",
+        "blocks": [
+            ("p", "Предел огнестойкости показывает, сколько минут конструкция сохраняет защитные свойства при стандартном пожаре. Для проходок применяют обозначения EI и EIT с числом минут — от 45 до 180."),
+            ("h2", "Что означают буквы"),
+            ("ul", ["E — целостность: конструкция не разрушается и не пропускает пламя и горячие газы",
+                    "I — теплоизолирующая способность: непрогреваемая сторона не нагревается выше нормируемой температуры",
+                    "T — дополнительное нормирование температуры (для кабельных и шинопроводных проходок)"]),
+            ("h2", "Что означают числа"),
+            ("p", "Число — это время в минутах: EIT 45, 60, 90, 120, 150 и 180. Чем выше требование к преграде, тем больший предел нужен для проходки в ней. Проходка не должна снижать огнестойкость стены или перекрытия, в которых она выполнена."),
+            ("h2", "Какой предел выбрать"),
+            ("p", "Требуемый предел определяется проектом и типом противопожарной преграды. Система ФП-БУСТ-ПКМ-01 перекрывает весь диапазон EIT/EI 45–180 минут для кабелей, шинопроводов, труб и воздуховодов."),
+        ],
+        "faq": [("Чем EIT отличается от EI?", "Индекс T дополнительно нормирует температуру и применяется для кабельных и шинопроводных проходок; EI используют для труб и воздуховодов."),
+                ("Какой максимальный предел у ФП-БУСТ-ПКМ-01?", "До EIT/EI 180 минут в зависимости от типа узла и преграды.")],
+    },
+    {
+        "slug": "montazh-ognestoykoy-prohodki", "title": "Монтаж огнестойкой проходки: 5 стадий",
+        "seo_title": "Монтаж огнестойкой проходки ФП-БУСТ-ПКМ-01 — 5 стадий пошагово",
+        "description": "Пошаговый монтаж огнестойкой проходки ФП-БУСТ-ПКМ-01: минплита, пена ФП-БУСТ-01, заделка наружных швов, финишный абляционный слой герметика ФП-БУСТ-05 и эстетика узла.",
+        "howto": True,
+        "blocks": [
+            ("p", "Монтаж узла ФП-БУСТ-ПКМ-01 выполняется в пять последовательных стадий. Соблюдение технологии обеспечивает заявленный предел огнестойкости и проход приёмки без замечаний."),
+            ("h2", "Стадии монтажа"),
+            ("ul", ["1. Монтаж минплиты — заполнение свободного пространства проёма фрагментами минераловатных плит плотностью ≥150 кг/м³",
+                    "2. Монтаж пены ФП-БУСТ-01 — заполнение пространства вокруг кабелей и шинопроводов на всю глубину заделки",
+                    "3. Заполнение наружных швов — обработка швов плит и примыканий к проёму и коммуникациям герметиком",
+                    "4. Финишный слой ФП-БУСТ-05 — абляционный слой толщиной ≥1 мм с обеих сторон проходки",
+                    "5. Эстетика узла — подрезка и затирка поверхности для чистого внешнего вида"]),
+            ("h2", "На что обратить внимание"),
+            ("p", "Минплита должна плотно заполнять проём без пустот; пена наносится на всю глубину заделки; финишный слой герметика должен заходить на проём. Эти детали напрямую влияют на огнестойкость узла."),
+        ],
+        "faq": [("Сколько слоёв герметика наносится?", "Финишный абляционный слой ФП-БУСТ-05 толщиной не менее 1 мм наносится с обеих сторон проходки."),
+                ("Какая плотность минплиты нужна?", "Не менее 150 кг/м³.")],
+    },
+    {
+        "slug": "materialy-zadelki", "title": "Материалы заделки проходок: пена, герметик, минплита",
+        "seo_title": "Материалы для огнестойких проходок — пена ФП-БУСТ-01, герметик ФП-БУСТ-05, минплита",
+        "description": "Материалы заделки огнестойких проходок ФП-БУСТ-ПКМ-01: противопожарная пена ФП-БУСТ-01, силиконовый огнестойкий герметик ФП-БУСТ-05 и базальтовые минераловатные плиты ≥150 кг/м³.",
+        "blocks": [
+            ("p", "Система ФП-БУСТ-ПКМ-01 построена вокруг трёх материалов, каждый из которых выполняет свою роль в узле заделки."),
+            ("h2", "Пена противопожарная ФП-БУСТ-01"),
+            ("p", "Заполняет вокругкабельное пространство, пространство вокруг шинопроводов и стыки минераловатных плит на всю глубину заделки."),
+            ("h2", "Герметик ФП-БУСТ-05"),
+            ("p", "Силиконовый огнестойкий герметик: герметизация наружных швов, абляционный дымоизолирующий слой и финишная обработка с захлёстом на проём."),
+            ("h2", "Минераловатные плиты"),
+            ("p", "Базальтовые плиты плотностью не менее 150 кг/м³ — бюджетное заполнение свободного пространства проёма вокруг коммуникаций."),
+        ],
+        "faq": [("Можно ли заменить минплиту другим материалом?", "Состав заделки нормируется типовым узлом; замена материалов меняет огнестойкость и требует пересчёта."),
+                ("Какой расход материалов?", "Зависит от габаритов проёма и числа коммуникаций — расчёт выполняется по спецификации к узлу.")],
+    },
+    {
+        "slug": "normativnye-trebovaniya", "title": "Нормативные требования к огнестойким проходкам",
+        "seo_title": "Нормативы для огнестойких проходок — ФЗ 123, СП 6.13130, ГОСТ Р 53316, ТР ЕАЭС 043/2017",
+        "description": "Какие нормы регулируют огнестойкие кабельные и инженерные проходки: ФЗ-123, СП 6.13130, ГОСТ Р 53316, ГОСТ 30247 и ТР ЕАЭС 043/2017. Что проверяет пожарная экспертиза.",
+        "blocks": [
+            ("p", "Огнестойкие проходки должны восстанавливать предел огнестойкости противопожарной преграды и подтверждаться сертификатами и протоколами испытаний. Ниже — ключевые нормы."),
+            ("h2", "Основные документы"),
+            ("ul", ["Технический регламент о требованиях пожарной безопасности (ФЗ-123)",
+                    "СП 6.13130 — электрооборудование и кабельные линии систем противопожарной защиты",
+                    "ГОСТ Р 53316 — кабельные проходки, методы испытаний на огнестойкость",
+                    "ГОСТ 30247.0-94 и 30247.1-94 — методы испытаний на огнестойкость",
+                    "ТР ЕАЭС 043/2017 — требования к средствам обеспечения пожарной безопасности"]),
+            ("h2", "Что проверяет экспертиза"),
+            ("p", "Соответствие узла проекту, наличие сертификатов и протоколов, корректную маркировку с пределом огнестойкости и фактическое выполнение узла по технологии. Полная нормативная база собрана на отдельной странице сайта."),
+        ],
+        "faq": [("Нужен ли сертификат на проходки?", "Да, для прохождения экспертизы передаётся сертификат соответствия и протоколы испытаний."),
+                ("По какому ГОСТу испытывают кабельные проходки?", "По ГОСТ Р 53316.")],
+    },
+    {
+        "slug": "prohodki-dlya-cod", "title": "Огнестойкие проходки для ЦОД и серверных",
+        "seo_title": "Огнестойкие кабельные проходки для ЦОД и дата-центров — ФП-БУСТ-ПКМ-01",
+        "description": "Огнестойкие кабельные проходки для ЦОД и серверных: плотная групповая прокладка кабелей, EIT до 180, ремонтопригодность и сдача без замечаний экспертизы.",
+        "blocks": [
+            ("p", "В центрах обработки данных кабельные проёмы особенно ответственны: высокая плотность прокладки, постоянные изменения трасс и жёсткие требования к надёжности. Огнестойкая проходка должна сохранять огнестойкость и при этом допускать обслуживание."),
+            ("h2", "Особенности проходок в ЦОД"),
+            ("ul", ["Плотная групповая прокладка силовых и слаботочных кабелей",
+                    "Высокие требования к пределу огнестойкости — часто EIT 120–180",
+                    "Необходимость доукладки кабелей без переделки узла",
+                    "Большое число однотипных проёмов — выгодны типовые решения"]),
+            ("h2", "Решение ФП-БУСТ-ПКМ-01"),
+            ("p", "Универсальные кабельные проходки рассчитаны на групповую прокладку, а разборные решения на пеноблоках ФП-БУСТ-01 позволяют добавлять кабели в эксплуатируемую проходку. Система применялась на центрах обработки данных в 2023–2025 годах."),
+        ],
+        "faq": [("Можно ли обслуживать проходку в работающем ЦОД?", "Да, разборные узлы на пеноблоках допускают доукладку кабелей без полной переделки."),
+                ("Какой предел огнестойкости обычно нужен в ЦОД?", "Чаще EIT 120–180 минут, точное значение определяет проект.")],
+    },
+    {
+        "slug": "oshibki-pozharnoy-ekspertizy", "title": "Частые ошибки в проходках при пожарной экспертизе",
+        "seo_title": "Ошибки в огнестойких проходках при пожарной экспертизе — как избежать",
+        "description": "Типичные причины замечаний пожарной экспертизы по кабельным и инженерным проходкам и как их избежать: маркировка, сертификаты, технология монтажа, состав заделки.",
+        "blocks": [
+            ("p", "Проходки — частая причина замечаний при приёмке объекта. Большинство проблем связано не с самим решением, а с отступлениями от технологии и неполным пакетом документов."),
+            ("h2", "Что приводит к замечаниям"),
+            ("ul", ["Отсутствие сертификата или протоколов испытаний на узел",
+                    "Несоответствие фактического узла маркировке в проекте",
+                    "Пустоты в заделке, недостаточная глубина пены или толщина герметика",
+                    "Замена материалов заделки без пересчёта огнестойкости",
+                    "Отсутствие маркировки и исполнительной документации на узлы"]),
+            ("h2", "Как избежать"),
+            ("p", "Закладывайте типовой узел с подтверждённым пределом огнестойкости, ведите шеф-монтаж и авторский надзор, сохраняйте полный пакет сертификатов и протоколов. Это снимает большинство вопросов экспертизы."),
+        ],
+        "faq": [("Можно ли пройти экспертизу без протоколов испытаний?", "Нет, протоколы и сертификат — обязательная часть пакета документов."),
+                ("Кто отвечает за соответствие узла проекту?", "Монтажная организация при поддержке шеф-монтажа и авторского надзора.")],
+    },
+    {
+        "slug": "razbornye-prohodki", "title": "Разборные (эксплуатируемые) проходки на пеноблоках",
+        "seo_title": "Разборные огнестойкие проходки на пеноблоках ФП-БУСТ-01 — доукладка кабелей",
+        "description": "Разборные эксплуатируемые огнестойкие проходки на пеноблоках ФП-БУСТ-01: позволяют добавлять и обслуживать кабели без полной переделки узла при сохранении огнестойкости.",
+        "blocks": [
+            ("p", "На объектах с регулярными изменениями кабельных трасс важна ремонтопригодность проходки. Для этого применяются разборные эксплуатируемые узлы на готовых пеноблоках ФП-БУСТ-01."),
+            ("h2", "Как это работает"),
+            ("p", "Пеноблоки заводского изготовления укладываются в проём и плотно охватывают кабели. При необходимости блок извлекается, добавляются кабели, и узел собирается обратно — без разрушения всей заделки."),
+            ("h2", "Преимущества"),
+            ("ul", ["Доукладка и обслуживание кабелей без полной переделки узла",
+                    "Сохранение предела огнестойкости после переборки",
+                    "Ускорение монтажа за счёт готовых элементов",
+                    "Удобство для ЦОД, щитовых и объектов с динамичными трассами"]),
+        ],
+        "faq": [("Сохраняется ли огнестойкость после переборки?", "Да, при правильной сборке узел сохраняет заявленный предел огнестойкости."),
+                ("Где применяют разборные проходки?", "В ЦОД, щитовых и на объектах, где кабельные трассы часто меняются.")],
+    },
+]
+
+
+def render_article(a) -> None:
+    slug = f"stati/{a['slug']}"
+    page = {"slug": slug, "prefix": prefix_for(slug),
+            "trail": [("Главная", ""), ("Статьи", "stati"), (a["title"], slug)],
+            "title": a["seo_title"], "description": a["description"], "og_type": "article"}
+    graph = [bc_schema(page["trail"]),
+             {"@type": "Article", "headline": a["title"], "description": a["description"],
+              "inLanguage": "ru-RU", "datePublished": TODAY, "dateModified": TODAY,
+              "author": {"@id": ORG_ID}, "publisher": {"@id": ORG_ID},
+              "mainEntityOfPage": abs_url(slug), "image": f"{BASE}/assets/img/og-cover.jpg"}]
+    if a.get("faq"):
+        graph.append(faq_schema(a["faq"]))
+    page["schema"] = {"@context": "https://schema.org", "@graph": graph}
+    faq_html = ""
+    if a.get("faq"):
+        items = "".join(f'\n          <details class="faq-item"><summary>{esc(q)}</summary><p>{esc(ans)}</p></details>'
+                        for q, ans in a["faq"])
+        faq_html = f'<div class="container"><h2>Частые вопросы</h2><div class="faq-list">{items}</div></div>'
+    other = "".join(
+        f'<a class="related-card" href="../{x["slug"]}/"><strong>{esc(x["title"])}</strong></a>'
+        for x in ARTICLES if x["slug"] != a["slug"])
+    body = f"""
+      <article class="section section-light page-hero">
+        <div class="container narrow">
+          <p class="eyebrow">Статья</p>
+          <h1>{esc(a['title'])}</h1>
+          <div class="prose article-body">
+            {render_blocks(a['blocks'])}
+            <div class="article-cta">
+              <a class="button button-primary" href="../../kalkulyator/">Подобрать узел в калькуляторе</a>
+              <a class="button button-secondary" href="../../#contacts">Получить расчёт КП</a>
+            </div>
+          </div>
+        </div>
+      </article>
+      <section class="section section-tinted">{faq_html}</section>
+      <section class="section section-light">
+        <div class="container"><h2>Другие материалы</h2><div class="related-grid">{other}</div></div>
+      </section>
+"""
+    write(page, body)
+
+
+def render_stati_index() -> None:
+    page = {"slug": "stati", "prefix": "../",
+            "trail": [("Главная", ""), ("Статьи", "stati")],
+            "title": "Статьи и база знаний по огнестойким проходкам ФП-БУСТ-ПКМ-01",
+            "description": "База знаний по огнестойким проходкам ФП-БУСТ-ПКМ-01: маркировка, пределы огнестойкости, монтаж, материалы, нормативы и решения для ЦОД.",
+            "og_type": "website"}
+    items = [{"@type": "ListItem", "position": i + 1, "url": abs_url(f"stati/{a['slug']}"), "name": a["title"]}
+             for i, a in enumerate(ARTICLES)]
+    page["schema"] = {"@context": "https://schema.org", "@graph": [
+        bc_schema(page["trail"]),
+        {"@type": "CollectionPage", "name": page["title"], "description": page["description"],
+         "url": abs_url("stati"), "hasPart": items}]}
+    cards = "".join(
+        f'<a class="article-card" href="{a["slug"]}/"><h3>{esc(a["title"])}</h3>'
+        f'<p>{esc(a["description"])}</p><span class="read-more">Читать →</span></a>'
+        for a in ARTICLES)
+    body = f"""
+      <section class="section section-light page-hero">
+        <div class="container">
+          <p class="eyebrow">База знаний</p>
+          <h1>Статьи по огнестойким проходкам ФП-БУСТ-ПКМ-01</h1>
+          <div class="page-lead"><p>Технические материалы по маркировке, пределам огнестойкости, монтажу,
+            материалам заделки и нормативам. Для специалистов и проектировщиков.</p></div>
+        </div>
+      </section>
+      <section class="section section-tinted">
+        <div class="container"><div class="article-grid">{cards}</div></div>
+      </section>
+"""
+    write(page, body)
+
+
+# =========================== GLOSSARY & NORMATIVES ===========================
+
+GLOSSARY = [
+    ("Огнестойкая проходка", "Узел заделки проёма в противопожарной преграде в месте прохода кабелей или инженерных коммуникаций, восстанавливающий предел огнестойкости преграды."),
+    ("Предел огнестойкости", "Время в минутах, в течение которого конструкция сохраняет несущую и/или ограждающую способность при стандартном пожаре."),
+    ("EI / EIT", "Обозначение предела огнестойкости: E — целостность, I — теплоизолирующая способность, T — нормирование температуры. Число — время в минутах."),
+    ("Абляционный слой", "Защитный слой герметика, который при нагреве расходует тепло на собственное разложение, замедляя прогрев конструкции."),
+    ("Минераловатная плита", "Базальтовая негорючая плита плотностью ≥150 кг/м³, используется для заполнения свободного пространства проёма."),
+    ("Шинопровод", "Жёсткий проводник для передачи электроэнергии; проходы шинопроводов до 1000 В и 6300 А герметизируются отдельным узлом."),
+    ("Закладная проходка", "Готовый узел проходки заводского изготовления, устанавливаемый в проём на этапе строительства."),
+    ("Шеф-монтаж", "Технический надзор и сопровождение монтажа узлов представителем поставщика системы на объекте."),
+]
+
+NORMATIVES = [
+    ("ФЗ-123", "Технический регламент о требованиях пожарной безопасности — базовый документ, устанавливающий требования к противопожарным преградам."),
+    ("СП 6.13130", "Свод правил по электрооборудованию и кабельным линиям систем противопожарной защиты."),
+    ("ГОСТ Р 53316", "Кабельные проходки. Методы испытаний на огнестойкость."),
+    ("ГОСТ 30247.0-94 / 30247.1-94", "Конструкции строительные. Методы испытаний на огнестойкость."),
+    ("ТР ЕАЭС 043/2017", "Технический регламент о требованиях к средствам обеспечения пожарной безопасности и пожаротушения."),
+]
+
+
+def render_dl_page(slug, eyebrow, h1, title, description, pairs, intro):
+    page = {"slug": slug, "prefix": "../", "trail": [("Главная", ""), (eyebrow, slug)],
+            "title": title, "description": description, "og_type": "website"}
+    page["schema"] = {"@context": "https://schema.org", "@graph": [
+        bc_schema(page["trail"]),
+        {"@type": "DefinedTermSet" if slug == "glossariy" else "WebPage",
+         "name": h1, "description": description, "url": abs_url(slug)}]}
+    rows = "".join(f'<div class="term"><dt>{esc(t)}</dt><dd>{esc(d)}</dd></div>' for t, d in pairs)
+    body = f"""
+      <section class="section section-light page-hero">
+        <div class="container narrow">
+          <p class="eyebrow">{esc(eyebrow)}</p>
+          <h1>{esc(h1)}</h1>
+          <div class="page-lead"><p>{esc(intro)}</p></div>
+        </div>
+      </section>
+      <section class="section section-tinted">
+        <div class="container narrow"><dl class="term-list">{rows}</dl></div>
+      </section>
+"""
+    write(page, body)
 
 
 def write_sitemap(slugs) -> None:
-    urls = [f"{BASE}/"] + [f"{BASE}/{s}/" for s in slugs]
+    urls = [abs_url("")] + [abs_url(s) for s in slugs]
     items = "\n".join(
         f"  <url>\n    <loc>{u}</loc>\n    <changefreq>monthly</changefreq>\n"
-        f"    <priority>{'1.0' if u == BASE + '/' else '0.8'}</priority>\n  </url>"
-        for u in urls
-    )
-    sm = ('<?xml version="1.0" encoding="UTF-8"?>\n'
-          '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-          f"{items}\n</urlset>\n")
-    (ROOT / "sitemap.xml").write_text(sm, encoding="utf-8")
+        f"    <priority>{'1.0' if u == abs_url('') else '0.8'}</priority>\n  </url>" for u in urls)
+    (ROOT / "sitemap.xml").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        f"{items}\n</urlset>\n", encoding="utf-8")
     print("wrote sitemap.xml with", len(urls), "urls")
 
 
@@ -483,7 +696,20 @@ def main() -> None:
     for page in PRODUCT_PAGES:
         render_product(page)
     render_calculator()
-    slugs = [p["slug"] for p in PRODUCT_PAGES] + ["kalkulyator"]
+    render_stati_index()
+    for a in ARTICLES:
+        render_article(a)
+    render_dl_page("glossariy", "Глоссарий", "Глоссарий терминов огнезащиты проходок",
+                   "Глоссарий терминов огнезащиты — огнестойкая проходка, EI/EIT, абляционный слой, минплита",
+                   "Словарь основных терминов по огнестойким кабельным и инженерным проходкам: предел огнестойкости, EI/EIT, абляционный слой, шинопровод и другие.",
+                   GLOSSARY, "Основные термины, которые встречаются в проектировании и монтаже огнестойких проходок.")
+    render_dl_page("normativy", "Нормативная база", "Нормативная база по огнестойким проходкам",
+                   "Нормативная база огнестойких проходок — ФЗ-123, СП 6.13130, ГОСТ Р 53316, ТР ЕАЭС 043/2017",
+                   "Нормативные документы по огнестойким кабельным и инженерным проходкам: ФЗ-123, СП 6.13130, ГОСТ Р 53316, ГОСТ 30247, ТР ЕАЭС 043/2017.",
+                   NORMATIVES, "Ключевые документы, регулирующие требования к огнестойким проходкам в России.")
+
+    slugs = ([p["slug"] for p in PRODUCT_PAGES] + ["kalkulyator", "stati"]
+             + [f"stati/{a['slug']}" for a in ARTICLES] + ["glossariy", "normativy"])
     write_sitemap(slugs)
 
 
