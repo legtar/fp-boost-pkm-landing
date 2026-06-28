@@ -1,0 +1,19 @@
+{
+  "name": "Огнестойкие проходки ФП-БУСТ-ПКМ-01",
+  "short_name": "ФП-БУСТ-ПКМ-01",
+  "description": "Огнестойкие проходки: сертификаты ЕАЭС, EIT до 180, шеф-монтаж и поставка материалов.",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f1838",
+  "theme_color": "#0f1838",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f1838'/%3E%3Cg fill='%23f0b36f'%3E%3Crect x='7' y='13' width='3' height='6' rx='1.5'/%3E%3Crect x='12' y='9' width='3' height='14' rx='1.5'/%3E%3Crect x='17' y='6' width='3' height='20' rx='1.5'/%3E%3Crect x='22' y='11' width='3' height='10' rx='1.5'/%3E%3C/g%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://legtar.github.io/fp-boost-pkm-landing/sitemap.xml
