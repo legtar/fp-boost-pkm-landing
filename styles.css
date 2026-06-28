@@ -1319,14 +1319,23 @@ figcaption {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
+  width: 54px;
+  height: 54px;
   margin-bottom: 1.1rem;
   border-radius: 14px;
   color: var(--white);
   background: linear-gradient(135deg, var(--navy), var(--burgundy));
-  font-size: 1.5rem;
-  font-weight: 800;
+  box-shadow: 0 10px 24px rgba(143, 28, 34, .28);
+}
+
+.advantage-icon svg {
+  width: 26px;
+  height: 26px;
+}
+
+.advantage-card:hover .advantage-icon {
+  transform: rotate(-4deg) scale(1.04);
+  transition: transform var(--dur-2) var(--ease-out);
 }
 
 .advantage-card h3 {
@@ -1792,3 +1801,49 @@ figcaption {
     font-size: 2.1rem;
   }
 }
+
+/* ---- EIT fire-resistance scale (custom vector) ---- */
+.eit-scale {
+  margin-top: 1.7rem;
+}
+
+.eit-scale-head {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: .65rem;
+  color: var(--navy);
+  font-weight: 750;
+  font-size: var(--text-sm);
+}
+
+.eit-flame {
+  width: 18px;
+  height: 18px;
+  fill: var(--burgundy);
+}
+
+.eit-track {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2px;
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow: 0 10px 26px rgba(104, 19, 24, .22);
+}
+
+.eit-track span {
+  padding: .6rem 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: var(--text-sm);
+  color: #fff;
+}
+
+.eit-track span:nth-child(1) { background: #b87532; }
+.eit-track span:nth-child(2) { background: #a85a2c; }
+.eit-track span:nth-child(3) { background: #9a3f28; }
+.eit-track span:nth-child(4) { background: #8f1c22; }
+.eit-track span:nth-child(5) { background: #7a1620; }
+.eit-track span:nth-child(6) { background: #681318; }
