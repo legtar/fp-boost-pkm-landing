@@ -229,9 +229,9 @@ button {
 }
 
 .hero-media {
-  background-image: url("assets/hero-field.jpg");
+  background-image: url("assets/img/hero-ai.jpg");
   background-size: cover;
-  background-position: center;
+  background-position: center right;
   transform: scale(1.02);
 }
 
