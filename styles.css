@@ -2205,3 +2205,13 @@ figcaption {
 .obekt figcaption strong { color: var(--navy); font-size: var(--text-lg); }
 .obekt figcaption span { color: var(--muted); font-size: var(--text-sm); }
 @media (max-width: 720px) { .obekty-grid { grid-template-columns: 1fr; } }
+
+/* Article header image */
+.article-hero-img {
+  margin: 1.4rem 0 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.article-hero-img img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
