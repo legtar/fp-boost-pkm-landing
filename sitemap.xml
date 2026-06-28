@@ -156,6 +156,36 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://legtar.github.io/fp-boost-pkm-landing/stati/ognezashita-kabelnyh-prohodok/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://legtar.github.io/fp-boost-pkm-landing/stati/protivopozharnaya-zashita-kabelnyh-liniy/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://legtar.github.io/fp-boost-pkm-landing/stati/pozharnaya-bezopasnost-prohodok/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://legtar.github.io/fp-boost-pkm-landing/stati/kabelnye-vvody-germetichnye/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://legtar.github.io/fp-boost-pkm-landing/stati/uplotnitelnye-moduli/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://legtar.github.io/fp-boost-pkm-landing/stati/protivopozharnye-mufty-truby/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://legtar.github.io/fp-boost-pkm-landing/glossariy/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
