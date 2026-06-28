@@ -46,7 +46,7 @@ const server = createServer((request, response) => {
     return;
   }
 
-  const filePath = resolvePath(request.url || "/");
+  let filePath = resolvePath(request.url || "/");
   if (!filePath) {
     sendText(response, 403, "Forbidden");
     return;
@@ -58,6 +58,17 @@ const server = createServer((request, response) => {
   } catch {
     sendText(response, 404, "File not found");
     return;
+  }
+
+  // Serve directory index.html (matches GitHub Pages behaviour)
+  if (fileStat.isDirectory()) {
+    filePath = join(filePath, "index.html");
+    try {
+      fileStat = statSync(filePath);
+    } catch {
+      sendText(response, 404, "File not found");
+      return;
+    }
   }
 
   if (!fileStat.isFile()) {

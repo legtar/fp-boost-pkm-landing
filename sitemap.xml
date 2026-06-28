@@ -1,14 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://legtar.github.io/fp-boost-pkm-landing/</loc>
-    <lastmod>2026-06-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
-    <image:image>
-      <image:loc>https://legtar.github.io/fp-boost-pkm-landing/assets/img/og-cover.jpg</image:loc>
-      <image:title>Огнестойкие проходки ФП-БУСТ-ПКМ-01</image:title>
-    </image:image>
+  </url>
+  <url>
+    <loc>https://legtar.github.io/fp-boost-pkm-landing/kabelnye-prohodki/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://legtar.github.io/fp-boost-pkm-landing/shinoprovody/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://legtar.github.io/fp-boost-pkm-landing/truby-vozduhovody/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://legtar.github.io/fp-boost-pkm-landing/kombinirovannye-prohodki/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://legtar.github.io/fp-boost-pkm-landing/kalkulyator/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
 </urlset>

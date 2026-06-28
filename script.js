@@ -424,4 +424,6 @@ setHeaderState();
 observeReveal();
 initCounters();
 initLeadForm();
-loadContent();
+if (elements.pageGrid) {
+  loadContent();
+}

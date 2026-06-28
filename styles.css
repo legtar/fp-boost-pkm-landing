@@ -1841,8 +1841,8 @@ figcaption {
   color: #fff;
 }
 
-.eit-track span:nth-child(1) { background: #b87532; }
-.eit-track span:nth-child(2) { background: #a85a2c; }
+.eit-track span:nth-child(1) { background: #9c5a18; }
+.eit-track span:nth-child(2) { background: #99511f; }
 .eit-track span:nth-child(3) { background: #9a3f28; }
 .eit-track span:nth-child(4) { background: #8f1c22; }
 .eit-track span:nth-child(5) { background: #7a1620; }
@@ -1865,3 +1865,266 @@ figcaption {
     linear-gradient(90deg, rgba(15, 24, 56, .95) 0%, rgba(15, 24, 56, .5) 60%, rgba(104, 19, 24, .35) 100%),
     url("assets/img/macro-seal.jpg") center / cover no-repeat;
 }
+
+/* ============================================================
+   Inner pages: breadcrumbs, product layout, calculator, howto
+   ============================================================ */
+
+.breadcrumbs {
+  padding: calc(72px + .85rem) 0 .85rem;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--text-sm);
+}
+
+.breadcrumbs .container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  align-items: center;
+  color: var(--muted);
+}
+
+.breadcrumbs a {
+  color: var(--burgundy);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.breadcrumbs a:hover { text-decoration: underline; }
+
+.page-hero { padding-top: 3rem; }
+
+.page-hero h1 {
+  margin-top: .6rem;
+  font-size: clamp(2rem, 4.5vw, 3rem);
+}
+
+.page-lead {
+  max-width: 760px;
+  margin-top: 1.1rem;
+}
+
+.page-lead p {
+  margin: 0 0 .8rem;
+  color: var(--muted);
+  font-size: var(--text-lg);
+}
+
+.split-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, .82fr);
+  gap: 2.4rem;
+  align-items: start;
+}
+
+.prose h2 {
+  font-size: var(--text-xl);
+  margin-bottom: .8rem;
+}
+
+.prose h2:not(:first-child) { margin-top: 2rem; }
+
+.ticks {
+  display: grid;
+  gap: .6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ticks li {
+  position: relative;
+  padding-left: 1.7rem;
+  color: #303740;
+}
+
+.ticks li::before {
+  content: "";
+  position: absolute;
+  left: .15rem;
+  top: .5em;
+  width: .5rem;
+  height: .5rem;
+  transform: translateY(-50%) rotate(45deg);
+  background: var(--burgundy);
+}
+
+.spec-aside {
+  position: sticky;
+  top: 88px;
+  padding: 1.6rem;
+  border: 1px solid var(--line);
+  border-top: 5px solid var(--navy);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.spec-aside h3 { font-size: var(--text-md); }
+.spec-aside .eit-track { margin: .8rem 0 1.3rem; }
+
+.spec-list { display: grid; gap: .9rem; margin: 0 0 1.4rem; }
+.spec-list div { display: grid; gap: .15rem; }
+.spec-list dt { color: var(--muted); font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.spec-list dd { margin: 0; color: var(--ink); font-weight: 600; }
+
+.button.full { width: 100%; }
+
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.6rem;
+}
+
+.related-card {
+  display: grid;
+  gap: .3rem;
+  padding: 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-decoration: none;
+  transition: transform var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
+}
+
+.related-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(143, 28, 34, .35);
+  box-shadow: 0 18px 40px rgba(19, 24, 36, .1);
+}
+
+.related-card strong { color: var(--navy); }
+.related-card span { color: var(--muted); font-size: var(--text-sm); }
+
+/* Calculator */
+.calc-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.calc-form {
+  display: grid;
+  gap: 1.1rem;
+  padding: 1.8rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.calc-form .field { display: grid; gap: .4rem; }
+.calc-form label { color: var(--navy); font-weight: 700; font-size: var(--text-sm); }
+.calc-form .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+.calc-form input,
+.calc-form select {
+  width: 100%;
+  min-height: 48px;
+  padding: .7rem .9rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--ink);
+  font-family: inherit;
+}
+
+.calc-form input:focus,
+.calc-form select:focus {
+  outline: none;
+  border-color: var(--burgundy);
+  background: var(--surface);
+}
+
+.calc-result {
+  padding: 1.8rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-2);
+  min-height: 100%;
+}
+
+.calc-result h3 { font-size: var(--text-lg); }
+.calc-empty { color: var(--muted); margin: .8rem 0 0; }
+.calc-error { color: var(--burgundy); font-weight: 700; margin: .8rem 0 0; }
+
+.calc-marking {
+  margin: .8rem 0 1.2rem;
+  padding: .9rem 1rem;
+  border-left: 4px solid var(--burgundy);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: var(--surface);
+  color: var(--navy);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: var(--text-lg);
+  word-break: break-word;
+}
+
+.calc-spec { display: grid; gap: .7rem; margin: 0 0 1.2rem; }
+.calc-spec div { display: flex; justify-content: space-between; gap: 1rem; border-bottom: 1px dashed var(--line); padding-bottom: .5rem; }
+.calc-spec dt { color: var(--muted); }
+.calc-spec dd { margin: 0; font-weight: 700; text-align: right; }
+
+.calc-result h4 { margin: 1rem 0 .5rem; font-size: var(--text-md); }
+.calc-materials { display: grid; gap: .5rem; margin: 0; padding-left: 1.1rem; color: #303740; }
+.calc-note { margin: 1rem 0; color: var(--muted); font-size: var(--text-sm); }
+.calc-actions { display: grid; gap: .6rem; }
+
+/* HowTo steps */
+.howto {
+  display: grid;
+  gap: .9rem;
+  margin: 1.4rem 0 0;
+  padding-left: 1.3rem;
+  max-width: 820px;
+}
+
+.howto li { color: #303740; }
+.howto strong { color: var(--navy); }
+
+/* Footer nav */
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem 1rem;
+  margin-top: .9rem;
+}
+
+.footer-nav a {
+  color: rgba(255, 255, 255, .72);
+  text-decoration: none;
+  font-size: var(--text-sm);
+}
+
+.footer-nav a:hover { color: #f0b36f; }
+
+@media (max-width: 920px) {
+  .split-cols,
+  .calc-wrap { grid-template-columns: 1fr; }
+  .spec-aside { position: static; }
+  .related-grid { grid-template-columns: 1fr; }
+}
+
+/* Card link on homepage type cards */
+.card-link {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--burgundy);
+  font-weight: 800;
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+
+.card-link:hover { text-decoration: underline; }
+
+/* A11y: accessible eyebrow/breadcrumb contrast on light backgrounds */
+.eyebrow { color: #9a5b18; }
+.hero .eyebrow,
+.section-dark .eyebrow,
+.section-portfolio .eyebrow,
+.section-cta .eyebrow { color: #f0b36f; }
+.breadcrumbs .container { color: #4d535c; }
