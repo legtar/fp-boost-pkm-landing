@@ -76,6 +76,36 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://legtar.github.io/fp-boost-pkm-landing/stati/okl-i-prohodki/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://legtar.github.io/fp-boost-pkm-landing/stati/kak-vybrat-prohodku/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://legtar.github.io/fp-boost-pkm-landing/stati/stoimost-prohodok/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://legtar.github.io/fp-boost-pkm-landing/stati/ognezashita-pod-klyuch/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://legtar.github.io/fp-boost-pkm-landing/stati/trebovaniya-sp-6-13130/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://legtar.github.io/fp-boost-pkm-landing/stati/shef-montazh/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://legtar.github.io/fp-boost-pkm-landing/glossariy/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
