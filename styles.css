@@ -2139,9 +2139,9 @@ figcaption {
 }
 
 .article-card {
-  display: grid;
-  gap: .5rem;
-  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
@@ -2155,9 +2155,26 @@ figcaption {
   box-shadow: 0 18px 40px rgba(19, 24, 36, .1);
 }
 
+.article-thumb {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  transition: transform var(--dur-3) var(--ease-out);
+}
+
+.article-card:hover .article-thumb { transform: scale(1.04); }
+
+.article-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  padding: 1.3rem;
+  flex: 1;
+}
+
 .article-card h3 { color: var(--navy); font-size: var(--text-lg); }
-.article-card p { margin: 0; color: var(--muted); font-size: var(--text-sm); }
-.read-more { color: var(--burgundy); font-weight: 800; font-size: var(--text-sm); }
+.article-card-desc { color: var(--muted); font-size: var(--text-sm); }
+.read-more { margin-top: auto; padding-top: .3rem; color: var(--burgundy); font-weight: 800; font-size: var(--text-sm); }
 
 .article-body { max-width: 760px; }
 .article-body p { margin: 0 0 1.1rem; color: #2f343c; font-size: var(--text-lg); line-height: 1.62; }

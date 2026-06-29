@@ -1224,8 +1224,11 @@ def render_stati_index() -> None:
         {"@type": "CollectionPage", "name": page["title"], "description": page["description"],
          "url": abs_url("stati"), "hasPart": items}]}
     cards = "".join(
-        f'<a class="article-card" href="{a["slug"]}/"><h3>{esc(a["title"])}</h3>'
-        f'<p>{esc(a["description"])}</p><span class="read-more">Читать →</span></a>'
+        f'<a class="article-card" href="{a["slug"]}/">'
+        f'<img class="article-thumb" src="../assets/img/articles/{a["slug"]}.jpg" alt="{esc(a["title"])}" loading="lazy" width="1280" height="853">'
+        f'<span class="article-card-body"><h3>{esc(a["title"])}</h3>'
+        f'<span class="article-card-desc">{esc(a["description"])}</span>'
+        f'<span class="read-more">Читать →</span></span></a>'
         for a in ARTICLES)
     body = f"""
       <section class="section section-light page-hero">
