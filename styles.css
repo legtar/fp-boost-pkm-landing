@@ -2232,3 +2232,20 @@ figcaption {
   box-shadow: var(--shadow);
 }
 .article-hero-img img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+
+/* Portfolio projects list */
+.projects-list { display: grid; gap: 1rem; margin-top: 1.6rem; }
+.project {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.2rem;
+  align-items: start;
+  padding: 1.3rem 1.5rem;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--burgundy);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: var(--surface);
+}
+.project-year { font-family: var(--font-mono); font-weight: 800; color: var(--burgundy); white-space: nowrap; }
+.project p { margin: 0; color: #303740; }
+@media (max-width: 600px) { .project { grid-template-columns: 1fr; gap: .4rem; } }

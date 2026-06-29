@@ -92,9 +92,9 @@ def head(page) -> str:
         <a href="{p}stati/">Статьи</a>
       </nav>
       <div class="header-actions">
-        <a class="header-phone" href="tel:+74950000000">
+        <a class="header-phone" href="tel:+79957926483">
           <span class="header-phone-label">Отдел продаж</span>
-          <span class="header-phone-number">+7 (495) 000-00-00</span>
+          <span class="header-phone-number">+7 995 792-64-83</span>
         </a>
         <a class="button button-primary header-cta" href="{p}#contacts">Получить расчёт КП</a>
       </div>
@@ -131,16 +131,18 @@ def footer(page) -> str:
             <a href="{p}kabelnye-prohodki/">Кабельные проходки</a>
             <a href="{p}shinoprovody/">Проходы шинопроводов</a>
             <a href="{p}truby-vozduhovody/">Трубы и воздуховоды</a>
-            <a href="{p}kombinirovannye-prohodki/">Комбинированные проходки</a>
+            <a href="{p}ognestoykie-shvy/">Огнестойкие швы</a>
             <a href="{p}kalkulyator/">Калькулятор</a>
             <a href="{p}stati/">Статьи</a>
-            <a href="{p}glossariy/">Глоссарий</a>
-            <a href="{p}normativy/">Нормативная база</a>
+            <a href="{p}obekty/">Объекты</a>
+            <a href="{p}o-kompanii/">О компании</a>
           </nav>
         </div>
         <div class="footer-links">
-          <a href="tel:+74950000000">+7 (495) 000-00-00</a>
-          <a href="mailto:info@fireprotectionboost.ru">info@fireprotectionboost.ru</a>
+          <a href="tel:+79957926483">+7 995 792-64-83</a>
+          <a href="mailto:fireprotectionboost@gmail.com">fireprotectionboost@gmail.com</a>
+          <a href="https://wa.me/79957926483" target="_blank" rel="noopener">WhatsApp</a>
+          <a href="https://www.youtube.com/@fireprotectionboost" target="_blank" rel="noopener">YouTube</a>
           <a href="https://www.fireprotectionboost.ru">www.fireprotectionboost.ru</a>
         </div>
       </div>
@@ -1328,6 +1330,17 @@ def render_obekty() -> None:
       </section>
       <section class="section section-light">
         <div class="container">
+          <h2>Реализованный монтаж огнезащиты</h2>
+          <div class="projects-list">
+            <article class="project"><span class="project-year">2022–2024</span><p>Монтаж огнестойких кабельных проходок в закладных гильзах, перфорированных и неперфорированных лотках ПП, лестничных лотках; комбинированные огнестойкие проходки EIT 60 – EIT 150. Проходы шинопроводов EIT 150. Проходы газоходов дымоудаления EIT 150.</p></article>
+            <article class="project"><span class="project-year">2023</span><p>Монтаж огнестойких проходов шинопроводов EIT 180.</p></article>
+            <article class="project"><span class="project-year">2023–2024</span><p>Монтаж огнестойких кабельных проходок в закладных гильзах и лотках; комбинированные проходки EIT 45 – EIT 120. Проходы шинопроводов EIT 120.</p></article>
+            <article class="project"><span class="project-year">2023–2024</span><p>Монтаж огнестойких кабельных проходок в перфорированных лотках EIT 150 и огнестойких деформационных (температурных) швов EI 180.</p></article>
+          </div>
+        </div>
+      </section>
+      <section class="section section-tinted">
+        <div class="container">
           <h2>Хотите такой же результат на вашем объекте?</h2>
           <div class="hero-actions">
             <a class="button button-primary" href="../#contacts">Получить расчёт КП</a>
@@ -1381,6 +1394,120 @@ def render_dostavka() -> None:
     write(page, body)
 
 
+def render_company() -> None:
+    page = {"slug": "o-kompanii", "prefix": "../", "trail": [("Главная", ""), ("О компании", "o-kompanii")],
+            "title": "О компании ТЕХНОСЕРТ ГРУП — производство и монтаж огнезащиты ФП-БУСТ",
+            "description": "ООО «Техносерт Груп» — собственное производство огнезащиты ФП-БУСТ (Fire Protection Boost) в Москве: проходки, швы, короба, муфты. Лаборатория рецептур, шеф-монтаж и аттестация бригад.",
+            "og_type": "website"}
+    page["schema"] = {"@context": "https://schema.org", "@graph": [
+        bc_schema(page["trail"]),
+        {"@type": "AboutPage", "name": page["title"], "description": page["description"],
+         "url": abs_url("o-kompanii"), "about": {"@id": ORG_ID}}]}
+    adv = ["Собственное производство в г. Москве",
+           "Собственная лаборатория разработки огнезащитных рецептур",
+           "Разработка конструктивных элементов огнезащиты",
+           "Техническая поддержка, шеф-монтаж и аттестация монтажных бригад",
+           "Монтаж огнезащитных проходок, коробов и огнестойких швов под ключ",
+           "Поддержка и консультации при разработке проектов огнезащиты"]
+    adv_html = "".join(f"<li>{esc(x)}</li>" for x in adv)
+    body = f"""
+      <section class="section section-light page-hero">
+        <div class="container narrow">
+          <p class="eyebrow">О компании</p>
+          <h1>Производство и монтаж огнезащиты ФП-БУСТ</h1>
+          <div class="page-lead article-body">
+            <p>ООО «Техносерт Груп» производит и монтирует противопожарные решения под торговой маркой
+            «ФП-БУСТ» (Fire Protection Boost — «повышение предела огнестойкости»). Сотрудничая с нами, вы
+            получаете клиентоориентированный подход, финансовую прозрачность, наилучшие сроки поставки и
+            стабильное качество продукции.</p>
+            <h2>Что мы предлагаем</h2>
+            <ul class="ticks">{adv_html}</ul>
+            <h2>История</h2>
+            <p>В 2022 году открыто производство огнезащитной продукции под маркой «ФП-БУСТ». В 2023 году
+            компания расширила складские площади и производственные мощности и вышла на рынок строительных
+            решений в России и за рубежом. С 2024 года — расширение ассортимента сертифицированных решений и
+            увеличение складских запасов.</p>
+            <h2>Сертификация и качество</h2>
+            <p>Продукция имеет специальное назначение и подлежит обязательной и добровольной сертификации
+            по нормам ТР ЕАЭС 043/2017. Гарантийные обязательства на объектах несут аккредитованные
+            дистрибьюторы, а аттестация строительно-монтажных бригад упрощает работу генподрядчиков и
+            сокращает сроки сдачи за счёт качественного монтажа.</p>
+            <div class="article-cta">
+              <a class="button button-primary" href="../#contacts">Связаться с нами</a>
+              <a class="button button-secondary" href="../obekty/">Смотреть объекты</a>
+            </div>
+          </div>
+        </div>
+      </section>
+"""
+    write(page, body)
+
+
+def render_shvy() -> None:
+    faq = [("Какой предел огнестойкости у швов ФП-БУСТ-ДШ-05?", "Деформационные (температурные) огнестойкие швы выполняются с пределом до EI 180 минут."),
+           ("Где применяются огнестойкие швы?", "В деформационных и температурных швах противопожарных стен и перекрытий, где требуется сохранить огнестойкость преграды."),
+           ("Чем отличается шов от проходки?", "Проходка заделывает проём с коммуникациями, а шов герметизирует деформационный зазор между конструкциями с сохранением подвижности.")]
+    page = {"slug": "ognestoykie-shvy", "prefix": "../", "trail": [("Главная", ""), ("Огнестойкие швы", "ognestoykie-shvy")],
+            "title": "Огнестойкие деформационные швы ФП-БУСТ-ДШ-05 — EI до 180",
+            "description": "Огнестойкие деформационные и температурные швы ФП-БУСТ-ДШ-05: герметизация швов противопожарных стен и перекрытий с пределом огнестойкости EI до 180 минут.",
+            "og_type": "website"}
+    page["schema"] = {"@context": "https://schema.org", "@graph": [
+        bc_schema(page["trail"]),
+        {"@type": "Product", "name": "Огнестойкий деформационный шов ФП-БУСТ-ДШ-05",
+         "category": "Огнезащита / огнестойкие швы", "brand": {"@type": "Brand", "name": "ФП-БУСТ"},
+         "manufacturer": {"@id": ORG_ID}, "description": page["description"], "image": f"{BASE}/assets/img/og-cover.jpg"},
+        faq_schema(faq)]}
+    feat = "".join(f"<li>{esc(x)}</li>" for x in [
+        "Предел огнестойкости EI 45–180 минут",
+        "Сохранение подвижности деформационного шва",
+        "Совместимость с материалами стен и перекрытий",
+        "Часть системы огнезащиты ФП-БУСТ"])
+    app = "".join(f"<li>{esc(x)}</li>" for x in [
+        "Деформационные и температурные швы противопожарных стен",
+        "Швы в перекрытиях и между конструкциями",
+        "Узлы примыкания огнестойких конструкций"])
+    eit = "".join(f"<span>{v}</span>" for v in ["45", "60", "90", "120", "150", "180"])
+    faq_html = "".join(f'\n          <details class="faq-item"><summary>{esc(q)}</summary><p>{esc(a)}</p></details>' for q, a in faq)
+    body = f"""
+      <section class="section section-light page-hero">
+        <div class="container">
+          <p class="eyebrow">Огнестойкие швы</p>
+          <h1>Огнестойкие деформационные швы ФП-БУСТ-ДШ-05</h1>
+          <div class="page-lead"><p>Огнестойкие деформационные и температурные швы ФП-БУСТ-ДШ-05 герметизируют
+            зазоры между строительными конструкциями, сохраняя огнестойкость противопожарной преграды и
+            подвижность шва. Часть системы огнезащиты ФП-БУСТ.</p></div>
+          <div class="hero-actions">
+            <a class="button button-primary" href="../#contacts">Получить расчёт КП</a>
+            <a class="button button-secondary" href="../o-kompanii/">О производстве</a>
+          </div>
+        </div>
+      </section>
+      <section class="section section-tinted">
+        <div class="container split-cols">
+          <div class="prose">
+            <h2>Применение</h2>
+            <ul class="ticks">{app}</ul>
+            <h2>Характеристики</h2>
+            <ul class="ticks">{feat}</ul>
+          </div>
+          <aside class="spec-aside">
+            <h3>Пределы огнестойкости EI, минут</h3>
+            <div class="eit-track">{eit}</div>
+            <dl class="spec-list">
+              <div><dt>Продукт</dt><dd>ФП-БУСТ-ДШ-05</dd></div>
+              <div><dt>Назначение</dt><dd>деформационные и температурные швы</dd></div>
+            </dl>
+            <a class="button button-primary full" href="../#contacts">Запросить КП</a>
+          </aside>
+        </div>
+      </section>
+      <section class="section section-light">
+        <div class="container"><h2>Частые вопросы</h2><div class="faq-list">{faq_html}</div></div>
+      </section>
+"""
+    write(page, body)
+
+
 def write_sitemap(slugs) -> None:
     urls = [abs_url("")] + [abs_url(s) for s in slugs]
     items = "\n".join(
@@ -1410,9 +1537,12 @@ def main() -> None:
                    NORMATIVES, "Ключевые документы, регулирующие требования к огнестойким проходкам в России.")
     render_obekty()
     render_dostavka()
+    render_company()
+    render_shvy()
 
     slugs = ([p["slug"] for p in PRODUCT_PAGES] + ["kalkulyator", "stati"]
-             + [f"stati/{a['slug']}" for a in ARTICLES] + ["glossariy", "normativy", "obekty", "dostavka"])
+             + [f"stati/{a['slug']}" for a in ARTICLES]
+             + ["glossariy", "normativy", "obekty", "dostavka", "o-kompanii", "ognestoykie-shvy"])
     write_sitemap(slugs)
 
 
