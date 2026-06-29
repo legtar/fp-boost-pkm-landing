@@ -132,6 +132,9 @@ def footer(page) -> str:
             <a href="{p}shinoprovody/">Проходы шинопроводов</a>
             <a href="{p}truby-vozduhovody/">Трубы и воздуховоды</a>
             <a href="{p}ognestoykie-shvy/">Огнестойкие швы</a>
+            <a href="{p}ognezashitnye-koroba/">Огнезащитные короба</a>
+            <a href="{p}mufty/">Муфты</a>
+            <a href="{p}materialy/">Материалы</a>
             <a href="{p}kalkulyator/">Калькулятор</a>
             <a href="{p}stati/">Статьи</a>
             <a href="{p}obekty/">Объекты</a>
@@ -1508,6 +1511,142 @@ def render_shvy() -> None:
     write(page, body)
 
 
+PRODUCTS2 = [
+    {
+        "slug": "ognezashitnye-koroba", "crumb": "Огнезащитные короба", "eyebrow": "Огнезащитные короба",
+        "h1": "Огнезащитные короба ФП-БУСТ-ОКК",
+        "title": "Огнезащитные короба ФП-БУСТ-ОКК — теплоотвод кабелей и шинопроводов",
+        "description": "Огнезащитные короба ФП-БУСТ-ОКК для теплоотвода при нагреве кабелей и шинопроводов за счёт естественной конвекции и защиты конструкций. Часть системы огнезащиты ФП-БУСТ.",
+        "image": "products/ognezashitnye-koroba.jpg",
+        "intro": ["Огнезащитные короба ФП-БУСТ-ОКК обеспечивают теплоотвод при нагреве кабелей и шинопроводов за счёт естественной конвекции и применяются в составе системы огнезащиты ФП-БУСТ.",
+                  "Изготавливаются под конкретные узлы и предел огнестойкости и интегрируются с проходками и швами системы."],
+        "applications": ["Теплоотвод при нагреве кабелей и шинопроводов",
+                         "Защита шпилек подвесов диаметром М8, М10, М12, М14, М16",
+                         "Огнезащитные кабельные короба и конструкции"],
+        "features": ["Естественная конвекция для отвода тепла",
+                     "Изготовление под диаметры подвесов М8–М16",
+                     "Различные исполнения под предел огнестойкости",
+                     "Часть единой системы огнезащиты ФП-БУСТ"],
+        "eit_letter": "EI", "spec": [("Продукт", "ФП-БУСТ-ОКК"), ("Назначение", "теплоотвод и защита конструкций")],
+        "faq": [("Зачем нужен огнезащитный короб?", "Для отвода тепла при нагреве кабелей и шинопроводов и защиты конструкций в составе огнезащитного узла."),
+                ("Под какие подвесы изготавливаются короба?", "Под диаметры шпилек подвесов М8, М10, М12, М14 и М16.")],
+    },
+    {
+        "slug": "mufty", "crumb": "Противопожарные муфты", "eyebrow": "Противопожарные муфты",
+        "h1": "Противопожарные муфты F.P.BOOST-COLLAR",
+        "title": "Противопожарные муфты F.P.BOOST-COLLAR для пластиковых труб",
+        "description": "Противопожарные муфты F.P.BOOST-COLLAR для защиты пластиковых (сгораемых) труб от прогорания и проникновения дыма и пламени в соседний пожарный отсек.",
+        "image": "products/mufty.jpg",
+        "intro": ["Противопожарные муфты F.P.BOOST-COLLAR защищают пластиковые (сгораемые) трубы от прогорания и не дают дыму и пламени проникнуть в соседний пожарный отсек.",
+                  "При нагреве вспучивающийся материал муфты расширяется и закрывает отверстие, остающееся после плавления трубы."],
+        "applications": ["Пластиковые трубы канализации и водопровода (ПП, ПВХ)",
+                         "Проходы горючих труб через стены и перекрытия",
+                         "Жилые, общественные и промышленные здания"],
+        "features": ["Вспучивающийся материал, образующий пробку из пенококса",
+                     "Различные диаметры под трубы",
+                     "Исполнения под требуемый предел огнестойкости",
+                     "Дополняют систему проходок для смешанных проёмов"],
+        "eit_letter": "EI", "spec": [("Продукт", "F.P.BOOST-COLLAR"), ("Назначение", "горючие полимерные трубы")],
+        "faq": [("На какие трубы ставят муфту?", "На горючие полимерные трубы из ПП и ПВХ — канализацию и водопровод."),
+                ("А для металлических труб и кабелей?", "Для них применяется огнестойкая проходка, а не муфта.")],
+    },
+    {
+        "slug": "kompozitnye-plity", "crumb": "Композитные плиты", "eyebrow": "Композитные плиты",
+        "h1": "Композитные огнезащитные плиты F.P.BOOST-EI30-60",
+        "title": "Композитные огнезащитные плиты F.P.BOOST-EI30-60",
+        "description": "Композитные огнезащитные плиты F.P.BOOST-EI30-60 для огнестойких строительных конструкций, огнезащитных кабельных коробов, подвесных потолков и облицовки несущих конструкций.",
+        "image": "products/kompozitnye-plity.jpg",
+        "intro": ["Композитные огнезащитные плиты F.P.BOOST-EI30-60 применяются в огнестойких строительных конструкциях и элементах огнезащиты.",
+                  "Используются для сборки коробов, перегородок и облицовок с нормируемым пределом огнестойкости."],
+        "applications": ["Огнестойкие строительные конструкции и ограждения",
+                         "Огнезащитные кабельные короба",
+                         "Подвесные потолки и облицовка несущих конструкций"],
+        "features": ["Предел огнестойкости EI 30–60",
+                     "Лёгкость сборки конструкций и коробов",
+                     "Совместимость с другими элементами системы ФП-БУСТ"],
+        "eit_letter": "EI", "spec": [("Продукт", "F.P.BOOST-EI30-60"), ("Предел", "EI 30–60")],
+        "faq": [("Где применяются композитные плиты?", "В огнестойких конструкциях, коробах, подвесных потолках и облицовке несущих конструкций."),
+                ("Какой предел огнестойкости?", "EI 30–60 в зависимости от конструкции.")],
+    },
+    {
+        "slug": "materialy", "crumb": "Материалы", "eyebrow": "Материалы",
+        "h1": "Материалы системы огнезащиты ФП-БУСТ",
+        "title": "Материалы ФП-БУСТ — пена ФП-БУСТ-01, герметик ФП-БУСТ-05, минплита",
+        "description": "Материалы системы огнезащиты ФП-БУСТ: противопожарная пена ФП-БУСТ-01, огнестойкий силиконовый герметик ФП-БУСТ-05 и базальтовая минераловатная плита 150 кг/м³.",
+        "image": "materials-studio.jpg",
+        "intro": ["Система огнезащиты ФП-БУСТ построена вокруг трёх материалов собственного производства, испытанных в составе узлов проходок и швов."],
+        "applications": ["Заделка кабельных и инженерных проходок",
+                         "Огнестойкие деформационные швы",
+                         "Уплотнение стыков минераловатных плит"],
+        "features": ["Пена противопожарная ФП-БУСТ-01 (ТУ 20.30.22-001-15417131-2021) — заполнение пространства вокруг кабелей и шинопроводов на всю глубину заделки",
+                     "Герметик огнестойкий силиконовый ФП-БУСТ-05 — наружные швы и финишный абляционный слой",
+                     "Минераловатная базальтовая плита 150 кг/м³, 1000×600×50 мм — заполнение свободного пространства проёма"],
+        "eit_letter": "EIT", "spec": [("Пена", "ФП-БУСТ-01"), ("Герметик", "ФП-БУСТ-05"), ("Плита", "150 кг/м³")],
+        "faq": [("Можно ли заменить материалы аналогами?", "Нет, огнестойкость подтверждается испытанием конкретного состава узла; замена требует пересчёта."),
+                ("Поставляете материалы отдельно?", "Да, материалы ФП-БУСТ отгружаются со склада под спецификацию объекта.")],
+    },
+]
+
+
+def render_product2(pp) -> None:
+    slug = pp["slug"]
+    img_abs = f"{BASE}/assets/img/{pp['image']}"
+    page = {"slug": slug, "prefix": "../", "trail": [("Главная", ""), (pp["crumb"], slug)],
+            "title": pp["title"], "description": pp["description"], "og_type": "website", "og_image": img_abs}
+    page["schema"] = {"@context": "https://schema.org", "@graph": [
+        bc_schema(page["trail"]),
+        {"@type": "Product", "name": pp["h1"], "category": "Огнезащита",
+         "brand": {"@type": "Brand", "name": "ФП-БУСТ"}, "manufacturer": {"@id": ORG_ID},
+         "description": pp["description"], "image": img_abs},
+        faq_schema(pp["faq"])]}
+    intro = "".join(f"<p>{esc(x)}</p>" for x in pp["intro"])
+    apps = "".join(f"<li>{esc(x)}</li>" for x in pp["applications"])
+    feat = "".join(f"<li>{esc(x)}</li>" for x in pp["features"])
+    eit = "".join(f"<span>{v}</span>" for v in ["45", "60", "90", "120", "150", "180"])
+    spec = "".join(f"<div><dt>{esc(d)}</dt><dd>{esc(v)}</dd></div>" for d, v in pp["spec"])
+    faq_html = "".join(f'\n          <details class="faq-item"><summary>{esc(q)}</summary><p>{esc(a)}</p></details>' for q, a in pp["faq"])
+    related = "".join(
+        f'<a class="related-card" href="../{r["slug"]}/"><strong>{esc(r["crumb"])}</strong></a>'
+        for r in PRODUCTS2 if r["slug"] != slug)
+    body = f"""
+      <section class="section section-light page-hero">
+        <div class="container">
+          <p class="eyebrow">{esc(pp['eyebrow'])}</p>
+          <h1>{esc(pp['h1'])}</h1>
+          <div class="page-lead">{intro}</div>
+          <figure class="article-hero-img"><img src="../assets/img/{pp['image']}" alt="{esc(pp['h1'])}" loading="lazy" width="1280" height="853"></figure>
+          <div class="hero-actions">
+            <a class="button button-primary" href="../#contacts">Получить расчёт КП</a>
+            <a class="button button-secondary" href="../o-kompanii/">О производстве</a>
+          </div>
+        </div>
+      </section>
+      <section class="section section-tinted">
+        <div class="container split-cols">
+          <div class="prose">
+            <h2>Применение</h2>
+            <ul class="ticks">{apps}</ul>
+            <h2>Характеристики</h2>
+            <ul class="ticks">{feat}</ul>
+          </div>
+          <aside class="spec-aside">
+            <h3>Пределы огнестойкости {esc(pp['eit_letter'])}, минут</h3>
+            <div class="eit-track">{eit}</div>
+            <dl class="spec-list">{spec}</dl>
+            <a class="button button-primary full" href="../#contacts">Запросить КП</a>
+          </aside>
+        </div>
+      </section>
+      <section class="section section-light">
+        <div class="container"><h2>Частые вопросы</h2><div class="faq-list">{faq_html}</div></div>
+      </section>
+      <section class="section section-tinted">
+        <div class="container"><h2>Другая продукция ФП-БУСТ</h2><div class="related-grid">{related}</div></div>
+      </section>
+"""
+    write(page, body)
+
+
 def write_sitemap(slugs) -> None:
     urls = [abs_url("")] + [abs_url(s) for s in slugs]
     items = "\n".join(
@@ -1539,10 +1678,13 @@ def main() -> None:
     render_dostavka()
     render_company()
     render_shvy()
+    for pp in PRODUCTS2:
+        render_product2(pp)
 
     slugs = ([p["slug"] for p in PRODUCT_PAGES] + ["kalkulyator", "stati"]
              + [f"stati/{a['slug']}" for a in ARTICLES]
-             + ["glossariy", "normativy", "obekty", "dostavka", "o-kompanii", "ognestoykie-shvy"])
+             + ["glossariy", "normativy", "obekty", "dostavka", "o-kompanii", "ognestoykie-shvy"]
+             + [pp["slug"] for pp in PRODUCTS2])
     write_sitemap(slugs)
 
 
